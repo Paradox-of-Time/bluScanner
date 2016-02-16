@@ -1,0 +1,21 @@
+.form-control.warn,
+.sm-form-control.warn {
+  border-color: #E4BF2C;
+}
+
+.bluForm-sex label {
+  margin-right: 10px;
+  padding-left: 6px;
+}
+
+.bluForm-dob.sm-form-control {
+  display: inline;
+}
+
+#bluForm-dob-d, #bluForm-dob-m {
+  width: 22%;
+}
+
+#bluForm-dob-y {
+  width: 30%;
+}
