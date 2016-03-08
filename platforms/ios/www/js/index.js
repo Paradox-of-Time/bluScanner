@@ -27,7 +27,25 @@ function hex2a(hex) {
 }
 
 var formData,
-    data = [];
+    scanData,
+    data = [],
+    currentSurveySection,
+    submitFired,
+    backlogFired,
+    triedblu,
+    triedEcig;
+
+$('document').ready(function() {
+    updateDeviceID();
+    updateEventID();
+    $('#bluForm-dob').mask('0000-00-00');
+    $('#bluForm-zip').mask('00000');
+    $('#bluForm-phone').mask('000-000-0000');
+    $('.cep').mask('00000-000');
+    $('.phone').mask('0000-0000');
+    $('.phone_with_ddd').mask('(00) 0000-0000');
+    $('.phone_us').mask('(000) 000-0000');
+});
 
 var app = {
     // Application Constructor
@@ -46,172 +64,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-
         app.receivedEvent('deviceready');
-
-        /**
-         * Use these scanner types
-         * Available: "PDF417", "USDL", "Bar Decoder", "Zxing", "MRTD", "UKDL", "MyKad"
-         */
-        // var types = ["Bar Decoder", "USDL", "PDF417", "UKDL", "MRTD", "Zxing"];
-        var types = ["USDL", "PDF417"];
-
-        /* license associated with com.momentumww.bluScanner DEMO ONLY */
-        var licenseiOs = "IZXZT3SI-BSSEETU3-OI7PX2JU-XCLIARHD-G6BL6LIY-CH7IMO6F-L7UTJOEW-RDXSFGTV";
-
-        // Remove warning if necessary
-        $('input').blur(function(){
-            if($(this).val()) {
-                $(this).removeClass('warn');
-            }
-        });
-
-        $('select').blur(function(){
-            if($(this).val()) {
-                $(this).removeClass('warn');
-            }
-        });
-
-        scanButton.addEventListener('click', function() { 
-            // Remove previous warning labels, if any
-            $('.warn').removeClass('warn');
-            // Reset form fields
-            $('#bluForm').reset();
-            
-            cordova.plugins.blinkIdScanner.scan(
-            
-                // Register the callback handler
-                function callback(scanningResult) {
-                    
-                    // handle cancelled scanning
-                    if (scanningResult.cancelled == true) {
-                        resultDiv.innerHTML = "Cancelled!";
-                        return;
-                    }
-                    
-                    // Obtain list of recognizer results
-                    var resultList = scanningResult.resultList;
-
-                    // Set constants
-                    var FNAME = '#bluForm-name',
-                        LNAME = '#bluForm-lname',
-                        STREET = '#bluForm-address',
-                        CITY = '#bluForm-city',
-                        STATE = '#bluForm-state',
-                        ZIP = '#bluForm-zip',
-                        YEAR = '#bluForm-dob-y',
-                        MONTH = '#bluForm-dob-m',
-                        DAY = '#bluForm-dob-d',
-                        SEXF = '#bluForm-sex-f',
-                        SEXM = '#bluForm-sex-m',
-                        SEXN = '#bluForm-sex-n';
-                    
-                    // Iterate through all results
-                    for (var i = 0; i < resultList.length; i++) {
-
-                        // Get individual resilt
-                        var recognizerResult = resultList[i];
-                        // if (recognizerResult.resultType == "Barcode result") {
-                        //     // handle Barcode scanning result
-
-                        //     var raw = "";
-                        //     if (typeof(recognizerResult.raw) != "undefined" && recognizerResult.raw != null) {
-                        //         raw = " (raw: " + hex2a(recognizerResult.raw) + ")";
-                        //     }
-                        //     resultDiv.innerHTML = "Data: " + recognizerResult.data +
-                        //                        raw +
-                        //                        " (Type: " + recognizerResult.type + ")";
-
-                        // }
-                        if (recognizerResult.resultType == 'USDL result') {
-
-                            var fields = recognizerResult.fields;
-                            
-                            if (fields[kPPCustomerFirstName]) {
-                                $(FNAME).val(fields[kPPCustomerFirstName]);
-                            } else {
-                                console.log(FNAME + ' is undefined');
-                                $(FNAME).toggleClass('warn');
-                            }
-
-                            if (fields[kPPCustomerFamilyName]) {
-                                $(LNAME).val(fields[kPPCustomerFamilyName]);
-                            } else {
-                                console.log(LNAME + ' is undefined');
-                                $(LNAME).toggleClass('warn');
-                            }
-
-                            if (fields[kPPAddressStreet]) {
-                                $(STREET).val(fields[kPPAddressStreet]);
-                            } else {
-                                console.log(STREET + ' is undefined');
-                                $(STREET).toggleClass('warn');
-                            }
-
-                            if (fields[kPPAddressCity]) {
-                                $(CITY).val(fields[kPPAddressCity]);
-                            } else {
-                                console.log(CITY + ' is undefined');
-                                $(CITY).toggleClass('warn');
-                            }
-
-                            if (fields[kPPAddressJurisdictionCode]) {
-                                $(STATE).val(fields[kPPAddressJurisdictionCode]);
-                            } else {
-                                console.log(STATE + ' is undefined');
-                                $(STATE).toggleClass('warn');
-                            }
-
-                            if (fields[kPPAddressPostalCode]) {
-                                $(ZIP).val(fields[kPPAddressPostalCode]);
-                            } else {
-                                console.log(ZIP + ' is undefined');
-                                $(ZIP).toggleClass('warn');
-                            }
-
-                            if (fields[kPPDateOfBirth]) {
-                                str = (fields[kPPDateOfBirth]);
-                                if (!/^(\d){8}$/.test(str)) {
-                                    // invalid date handling
-                                }
-
-                                // $('#bluForm-email').val(fields[kPPDateOfBirth]);
-
-                                var y = str.substr(4,4),
-                                    m = str.substr(0,2),
-                                    d = str.substr(2,2);
-
-                                $(MONTH).val(m);
-                                $(DAY).val(d);
-                                $(YEAR).val(y);
-                            }
-
-                            if (fields[kPPSex]) {
-                                sex = (fields[kPPSex]);
-
-                                if (sex == '1') {
-                                    $(SEXM).prop("checked", true);    
-                                } else if (sex == '2') {
-                                    $(SEXF).prop("checked", true);
-                                } else {
-                                    $(SEXN).prop("checked", true);
-                                }
-                            } else {
-                                console.log(ZIP + ' is undefined')
-                            }
-                        }                  
-                    }
-                },
-                
-                // Register the error callback
-                function errorHandler(err) {
-                    alert('Error: ' + err);
-                },
-
-                types, licenseiOs
-            );
-        });
-
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -220,60 +73,267 @@ var app = {
 };
 
 // Buttons & Actions
-jQuery(function($)  
-{
+jQuery(function($) {
+    /**
+     * Use these scanner types
+     * Available: "PDF417", "USDL", "Bar Decoder", "Zxing", "MRTD", "UKDL", "MyKad"
+     */
+    // var types = ["Bar Decoder", "USDL", "PDF417", "UKDL", "MRTD", "Zxing"];
+    var types = ["USDL", "PDF417"];
+
+    /* license associated with com.momentumww.bluScanner DEMO ONLY */
+    var licenseiOs = "IZXZT3SI-BSSEETU3-OI7PX2JU-XCLIARHD-G6BL6LIY-CH7IMO6F-L7UTJOEW-RDXSFGTV";
+
+    // Remove warning if necessary
+    $('input').blur(function(){
+        if ($(this).val()) {
+            $(this).removeClass('warn');
+        }
+    });
+
+    $('select').blur(function(){
+        if ($(this).val()) {
+            $(this).removeClass('warn');
+        }
+    });
+
+    // Listen for 'Tried Blu?' response changes...
+    $('input[name="tried_blu"]').change(function(e) {
+        triedBlu = $('input[name=tried_blu]:checked', '#bluForm').val();
+
+        if (triedBlu == 'No') {
+            $('#whyNotBlu').fadeIn();
+        } else if (triedBlu == 'Yes') {
+            $('#whyNotBlu').fadeOut();
+            $('textarea[name=blu_no_reason]').val('');
+        }
+    });
+
+    // Listen for 'Tried eCig?' response changes...
+    $('input[name="tried_ecig"]').change(function(e) {
+        triedEcig = $('input[name=tried_ecig]:checked', '#bluForm').val();
+
+        if (triedEcig == 'Yes') {
+            $('#pastBrands').fadeIn();
+        } else if (triedEcig == 'No') {
+            $('#pastBrands').fadeOut();
+            // reset the previously hidden field
+            $('input[name="ecig_brands_tried[]"]').prop('checked', false);
+        }
+    });
+
+    $('#setDeviceID').click(function() {
+        var deviceID = $('#deviceIDField').val();
+        if (!deviceID) {
+            window.alert('Please enter a valid ID!')
+        } else {
+            localStorage['deviceID'] = deviceID;
+            updateDeviceID();
+        }
+    });
+
+    $('#setEventID').click(function() {
+        var eventID = $('select[name="eventID"]').val();
+        if (!eventID) {
+            window.alert('Please select an event!')
+        } else {
+            localStorage['eventID'] = eventID;
+            updateEventID();
+        }
+    });
+
+    $('#scanButton').click(function() {
+        console.log('scan button clicked');
+        // Remove previous warning labels, if any
+        $('.warn').removeClass('warn');
+        // Reset form fields
+        $('#bluForm')[0].reset();
+        
+        cordova.plugins.blinkIdScanner.scan(
+        
+            // Register the callback handler
+            function callback(scanningResult) {
+                
+                // handle cancelled scanning
+                if (scanningResult.cancelled == true) {
+                    resultDiv.innerHTML = "Cancelled!";
+                    return;
+                }
+                
+                // Obtain list of recognizer results
+                var resultList = scanningResult.resultList;
+                
+                // Iterate through all results
+                for (var i = 0; i < resultList.length; i++) {
+
+                    // Get individual resilt
+                    var recognizerResult = resultList[i];
+                    // if (recognizerResult.resultType == "Barcode result") {
+                    //     // handle Barcode scanning result
+
+                    //     var raw = "";
+                    //     if (typeof(recognizerResult.raw) != "undefined" && recognizerResult.raw != null) {
+                    //         raw = " (raw: " + hex2a(recognizerResult.raw) + ")";
+                    //     }
+                    //     resultDiv.innerHTML = "Data: " + recognizerResult.data +
+                    //                        raw +
+                    //                        " (Type: " + recognizerResult.type + ")";
+
+                    // }
+                    if (recognizerResult.resultType == 'USDL result') {
+
+                        // Camera Scanner Fields
+                        // var fields = recognizerResult.fields,
+                        //     FNAME = fields[kPPCustomerFirstName],
+                        //     LNAME = fields[kPPCustomerFamilyName],
+                        //     ADDRESS1 = fields[kPPAddressStreet],
+                        //     CITY = fields[kPPAddressCity],
+                        //     STATE = fields[kPPAddressJurisdictionCode],
+                        //     ZIP = fields[kPPAddressPostalCode],
+                        //     DOB = fields[kPPDateOfBirth],
+                        //     SEX = fields[kPPSex];
+
+                        // Hardware Scanner Fields
+                        var FNAME = scanData.firstName,
+                            LNAME = scanData.lastName,
+                            ADDRESS1 = scanData.address1,
+                            ADDRESS2 = scanData.address2,
+                            CITY = scanData.city,
+                            STATE = scanData.jurisdictionCode,
+                            ZIP = scanData.postalCode,
+                            DOB = scanData.birthdate,
+                            SEX = scanData.gender;
+
+                        var fields = recognizerResult.fields;
+                        
+                        if (FNAME) {
+                            $('#bluForm-name').val(FNAME);
+                        } else {
+                            console.log(FNAME + ' is undefined');
+                            $('#bluForm-name').toggleClass('warn');
+                        }
+
+                        if (LNAME) {
+                            $('#bluForm-lname').val(LNAME);
+                        } else {
+                            console.log(LNAME + ' is undefined');
+                            $('#bluForm-lname').toggleClass('warn');
+                        }
+
+                        if (ADDRESS1) {
+                            $('#bluForm-address1').val(ADDRESS1);
+                        } else {
+                            console.log(ADDRESS1 + ' is undefined');
+                            $('#bluForm-address1').toggleClass('warn');
+                        }
+
+                        if (CITY) {
+                            $('#bluForm-city').val(CITY);
+                        } else {
+                            console.log(CITY + ' is undefined');
+                            $('#bluForm-city').toggleClass('warn');
+                        }
+
+                        if (STATE) {
+                            $('#bluForm-state').val(STATE);
+                        } else {
+                            console.log(STATE + ' is undefined');
+                            $('#bluForm-state').toggleClass('warn');
+                        }
+
+                        if (ZIP) {
+                            $('#bluForm-zip').val(ZIP);
+                        } else {
+                            console.log(ZIP + ' is undefined');
+                            $('#bluForm-zip').toggleClass('warn');
+                        }
+
+                        if (DOB) {
+                            str = (DOB);
+                            if (!/^(\d){8}$/.test(str)) {
+                                // invalid date handling
+                            }
+
+                            // $('#bluForm-email').val(fields[kPPDateOfBirth]);
+
+                            var y = str.substr(4,4),
+                                m = str.substr(0,2),
+                                d = str.substr(2,2);
+
+                            $('#bluForm-dob').val(y + '-' + m + '-' + d);
+                        } else {
+                            console.log(DOB + ' is undefined')
+                        }
+
+                        if (SEX) {
+                            sex = (SEX);
+
+                            if (sex == '1') {
+                                $('#bluForm-sex-m').prop("checked", true);    
+                            } else if (sex == '2') {
+                                $('#bluForm-sex-f').prop("checked", true);
+                            } else {
+                                $('#bluForm-sex-n').prop("checked", true);
+                            }
+                        } else {
+                            console.log('Gender is undefined')
+                        }
+                    }                  
+                }
+            },
+            
+            // Register the error callback
+            function errorHandler(err) {
+                alert('Error: ' + err);
+            },
+
+            types, licenseiOs
+        );
+    });
+
     $('#clearStorage').click(function () {
         window.localStorage.deleteArray('data');
         console.log('Storage deleted');
     });
 
-    $('#submit').click(function () {
-        formData = $('form').serializeArray();
-        mandrillFired = true;
-        console.log(formData);
-        window.localStorage.pushArrayItem('data', formData);
-
-        data = window.localStorage.getArray('data');
-
-        for (var i = 0; i < (data.length); i++) {
-            console.log(data[i]);
-            if (data[i] != formData) {
-                // $.ajax({
-                //     type: "POST",
-                //     url: "https://mandrillapp.com/api/1.0/messages/send-template.json",
-                //     data: {
-                //         "key": "vV0UyEfydJwLYC8XoC1NwA",
-                //             "template_name": "ritz-welcome-email-1", //ritz-welcome-email-1 for team 2 | ritz-test for testing
-                //             "template_content": [
-                //             {
-                //                "name": "example name",
-                //                "content": "example content"
-                //             }
-                //         ],
-                //         "message": {
-                //             "from_email": "snacks@ritzcrackers.com",
-                //             "to": [
-                //             {
-                //                 "email": emails[i], //$("#reg-form").serialize(),
-                //                 "type": "to"
-                //              }
-                //             ],
-                //             "subject": "Get snacking with these Big Ritz Snack Truck Recipes."
-                //         }
-                //     }
-
-                //     }).done(function(response) {
-                //         console.log("Backlog sent");
-                //         backlogFired = true;
-                //     }).fail(function(response) {
-                //         console.log("Backlog wasn't sent");
-                //         backlogFired = false;
-                //     });
-            }
+    $('#startSurvey').click(function() {
+        if (validateForm()) {
+            $('#bluSurvey').fadeIn();
         }
-
-        return false; // prevent page refresh
     });
+
+    $('#next1').click(function() {
+        currentSurveySection = 'start';
+        goNext(currentSurveySection);
+    });
+
+    $('#nextVapeA').click(function() {
+        currentSurveySection = 'vapeA';
+        goNext(currentSurveySection);
+    });
+
+    $('#nextVapeB').click(function() {
+        currentSurveySection = 'vapeB';
+        goNext(currentSurveySection);
+    });
+
+    $('#nextVapeC').click(function() {
+        currentSurveySection = 'vapeC';
+        goNext(currentSurveySection);
+    });
+
+    $('#nextSmoke').click(function() {
+        currentSurveySection = 'smoke';
+        goNext(currentSurveySection);
+    });
+
+    $('#getEvents').click(updateEvents);
+
+    function updateEvents() {
+
+    }
+
+    
 });
 
 function signupComplete() {
@@ -283,38 +343,38 @@ function signupComplete() {
 function sendBacklog(emails) {
     // console.log("sending backlog...");
 
-    emails = window.localStorage.getArray('emails');
+    data = window.localStorage.getArray('data');
 
-    for (var i = 0; i < (emails.length); i++) {
-    // console.log(email);
-    // console.log(emails[i]);
-    if (emails[i] != email) {
-        $.ajax({
-            type: "POST",
-            url: "https://mandrillapp.com/api/1.0/messages/send-template.json",
-            data: {
-                "key": "vV0UyEfydJwLYC8XoC1NwA",
-                    "template_name": "ritz-welcome-email-1", //ritz-welcome-email-1 for team 2 | ritz-test for testing
-                    "template_content": [
-                    {
-                       "name": "example name",
-                       "content": "example content"
-                    }
-                ],
-                "message": {
-                    "from_email": "snacks@ritzcrackers.com",
-                    "to": [
-                    {
-                        "email": emails[i], //$("#reg-form").serialize(),
-                        "type": "to"
-                     }
+    for (var i = 0; i < (data.length); i++) {
+        console.log(data[i]);
+        if (data[i] != formData) {
+            // if data isn't a duplicate
+            $.ajax({
+                type: "POST",
+                url: "https://mandrillapp.com/api/1.0/messages/send-template.json",
+                data: {
+                    "key": "vV0UyEfydJwLYC8XoC1NwA",
+                        "template_name": "ritz-welcome-email-1", //ritz-welcome-email-1 for team 2 | ritz-test for testing
+                        "template_content": [
+                        {
+                           "name": "example name",
+                           "content": "example content"
+                        }
                     ],
-                    "subject": "Get snacking with these Big Ritz Snack Truck Recipes."
+                    "message": {
+                        "from_email": "snacks@ritzcrackers.com",
+                        "to": [
+                        {
+                            "email": emails[i], //$("#reg-form").serialize(),
+                            "type": "to"
+                         }
+                        ],
+                        "subject": "Get snacking with these Big Ritz Snack Truck Recipes."
+                    }
                 }
-            }
 
             }).done(function(response) {
-                console.log("Backlog email sent");
+                console.log("Backlog sent");
                 backlogFired = true;
             }).fail(function(response) {
                 console.log("Backlog wasn't sent");
@@ -330,6 +390,402 @@ function sendBacklog(emails) {
         window.localStorage.deleteArray('emails');
     }
 }
+
+/*
+    Function Name:  DT_DecoderDataResponse
+    Description:    Function called when the scanner successfully reads a barcode.
+    Inputs:         "decoderData": "123456789",    //Data read from barcode as a UTF8 string
+                    "rawDecoderData": "XSDFSED"    //Raw data in base64 read from the barcode
+    Outputs:        None
+    Notes:          Returns scan data in both UTF8 and RAW base64 strings
+*/
+
+function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlParsedObject) {
+
+    //We recomend using the "RAW" Base64 data and decoding it with the built-in "atob" function
+        
+    //Now you can call processing functions to handle the barcode scanner data however you'd like.
+    // var ActiveObject = document.activeElement;
+    // ActiveObject.value = scanData;
+    // scanData = atob(dlParsedObject);
+    
+    // Alert the user with a naitive iOS alert box of the scan data
+    // DT_AlertBoxRequest(12345, 'Scan Data', 'first name: ' + dlParsedObject.firstName, ['OK']);
+    
+    var FNAME = dlParsedObject.firstName,
+        LNAME = dlParsedObject.lastName,
+        ADDRESS1 = dlParsedObject.address1,
+        ADDRESS2 = dlParsedObject.address2,
+        CITY = dlParsedObject.city,
+        STATE = dlParsedObject.jurisdictionCode,
+        ZIP = dlParsedObject.postalCode,
+        DOB = dlParsedObject.birthdate,
+        SEX = dlParsedObject.gender;
+    
+    if (FNAME) {
+        $('#bluForm-name').val(FNAME);
+    } else {
+        console.log(FNAME + ' is undefined');
+        $('#bluForm-name').toggleClass('warn');
+    }
+
+    if (LNAME) {
+        $('#bluForm-lname').val(LNAME);
+    } else {
+        console.log(LNAME + ' is undefined');
+        $('#bluForm-lname').toggleClass('warn');
+    }
+
+    if (ADDRESS1) {
+        $('#bluForm-address1').val(ADDRESS1);
+    } else {
+        console.log(ADDRESS1 + ' is undefined');
+        $('#bluForm-address1').toggleClass('warn');
+    }
+
+    if (CITY) {
+        $('#bluForm-city').val(CITY);
+    } else {
+        console.log(CITY + ' is undefined');
+        $('#bluForm-city').toggleClass('warn');
+    }
+
+    if (STATE) {
+        $('#bluForm-state').val(STATE);
+    } else {
+        console.log(STATE + ' is undefined');
+        $('#bluForm-state').toggleClass('warn');
+    }
+
+    if (ZIP) {
+        $('#bluForm-zip').val(ZIP);
+    } else {
+        console.log(ZIP + ' is undefined');
+        $('#bluForm-zip').toggleClass('warn');
+    }
+
+    if (DOB) {
+        str = (DOB);
+        if (!/^(\d){8}$/.test(str)) {
+            // invalid date handling
+        }
+
+        // $('#bluForm-email').val(fields[kPPDateOfBirth]);
+
+        var d = str.substr(4,2),
+            m = str.substr(0,2),
+            y = str.substr(2,4);
+
+        $('#bluForm-dob').val(y + '-' + m + '-' + d);
+    } else {
+        console.log(DOB + ' is undefined')
+    }
+
+    if (SEX) {
+        sex = (SEX);
+
+        $('#bluForm-email').val(sex);
+
+        if ((sex == '1') || (sex == 'male') || (sex == 'MALE') || (sex == 'Male')) {
+            $('#bluForm-sex-m').prop('checked', true);
+        } else if (sex == '2' || (sex == 'female') || (sex == 'FEMALE') || (sex == 'Female')) {
+            $('#bluForm-sex-f').prop('checked', true);
+        } else {
+            $('#bluForm-sex-n').prop('checked', true);
+        }
+    } else {
+        console.log('Gender is undefined')
+    }
+    
+}
+
+// Get List of events
+$('#updateEventList').click(function() {
+    $.ajax({
+        type: 'POST',
+        url: 'http://blu.momentum.networkninja.com/api/v1/events',
+        data: {device_id : "ABCD"},
+        dataType: 'json',
+        success: function(response) {
+            console.log(response);
+        },
+        statusCode: {
+            200: function (response) {
+                console.log('Success!')
+            },
+            400: function (response) {
+                console.log('Bad Request')
+            },
+            400: function (response) {
+                console.log('Bad Request')
+            },
+            404: function (response) {
+                console.log('Unknown Method')
+            },
+            500: function (response) {
+                console.log(response.responseText);
+            },
+            503: function (response) {
+                console.log('Service unavailable')
+            }
+        },
+        error: function (e) {
+            console.log("Server error - " + e.error);
+        }
+    })
+});
+
+$('#submit').click(function (event) {
+    event.preventDefault();
+    updateTimestamp();
+    updateEventID();
+    // formData = $('#bluForm').serializeJSON();
+
+    formData = [{
+        "events_id": 481028,
+        "first_name": "James",
+        "last_name": "Bond",
+        "address": "1600 Amphitheater Parkway",
+        "address_2": "",
+        "city": "Mountain View",
+        "state": "CA",
+        "zip": "94043",
+        "gender": "male",
+        "dob": "1980-02-22",
+        "phone": "773-555-1212",
+        "email": "user@email.com",
+        "device_id": "ABCD",
+        "timestamp": "2014-02-12 17:03:21",
+        "opt_in": "false",
+        "coupon_code": "A64",
+        "communication_opt_in": "true",
+        "sampling_flavor": "Express Kit",
+        "current_product_use": "Both",
+        "tried_ecig": "Yes",
+        "ecig_brands_tried": [
+            "BLU",
+            "Mark10"
+        ],
+        "vape_use_duration": "6MO - 1YR",
+        "mod_or_ecig": "MOD",
+        "why_mod": "MORE POWERFUL",
+        "current_ecig_brand": "VUSE",
+        "tried_blu": "No",
+        "blu_no_reason": "Free form response",
+        "blu_nation_opt_in": "Yes",
+        "liked_sample": "No",
+        "liked_no_reason": "It tasted bad"
+    }];
+
+    $.ajax({
+        type: "POST",
+        url: "http://blu.momentum.networkninja.com/api/v1/save",
+        dataType: "json",
+        data: formData[0],
+        success: function(result) {
+            console.log('success! ' + result);
+        },
+        statusCode: {
+            200: function (response) {
+                console.log('Success!')
+            },
+            400: function (response) {
+                console.log('Bad Request')
+            },
+            400: function (response) {
+                console.log('Bad Request')
+            },
+            404: function (response) {
+                console.log('Unknown Method')
+            },
+            500: function (response) {
+                console.log('Something went wrong')
+            },
+            503: function (response) {
+                console.log('Service unavailable')
+            }
+        },
+        error: function (e) {
+            console.log("Server error - " + e.error);
+        }
+    });
+
+    // for (var i = 0; i < (data.length); i++) {
+    //     console.log(data[i]);
+    //     if (data[i] != formData) {
+    //         // if data isn't a duplicate
+
+    //         console.log('not a duplicate!');
+
+    //         var jsonData = JSON.stringify(data[i]);
+
+    //         console.log(jsonData);
+
+    //         $.ajax({
+    //             type: "POST",
+    //             url: "http://blu.momentum-stage.networkninja.com.com/api/v1/api.php",
+    //             data: jsonData
+    //         }).done(function(response) {
+    //             console.log("Successfully submitted: " + response);
+    //             signupComplete();
+    //             submitFired = true;
+    //         }).fail(function(response) {
+    //             console.log("Submitting failed:" + response);
+    //             window.localStorage.pushArrayItem('data', formData);
+    //             submitFired = false;
+    //         });
+    //     }
+    // }
+
+    // return false; // prevent page refresh
+});
+
+function updateDeviceID() {
+    var latestDeviceID = localStorage['deviceID'];
+    console.log('Device ID = ' + latestDeviceID);
+    $('#currentDeviceID').html(latestDeviceID);
+    $('#device_id').val(latestDeviceID);
+}
+
+function updateEventID() {
+    var latestEventID = localStorage['eventID'];
+    console.log('Event ID = ' + latestEventID);
+    $('#currentEventID').html(latestEventID);
+    $('#event_id').val(latestEventID);
+}
+
+function goNext(currentPage) {
+    switch (currentPage) {
+        case 'start':
+            console.log(currentPage);
+            var smokerType = $('input[name=current_product_use]:checked', '#bluForm').val();
+            console.log(smokerType);
+            if ((smokerType == 'Vape') || (smokerType == 'Both')) {
+                // currentPage = 'vapeA';
+                $('section#start').fadeOut();
+                setTimeout(function() {
+                    $('section#vapeA').fadeIn();
+                }, 800);
+            } else if (smokerType == 'Smoke') {
+                // currentPage = 'smoke';
+                $('section#start').fadeOut();
+                setTimeout(function() {
+                    $('section#smoke').fadeIn();
+                }, 800);
+            } else if (smokerType == 'Neither') {
+                // currentPage = 'final';
+                $('section#start').fadeOut();
+                setTimeout(function() {
+                    $('section#final').fadeIn();
+                }, 800);
+            } else {
+                // alert('Answer the question!')
+                console.log('nothing chosen!');
+            }
+            break;
+
+        case 'vapeA':
+            console.log(currentPage);
+            var usualBrand = $( "#usualBrand" ).val();
+            console.log(usualBrand);
+            if (usualBrand == 'blu') {
+                // currentPage = 'final';
+                $('section#vapeA').fadeOut();
+                setTimeout(function() {
+                    $('section#final').fadeIn();
+                }, 800);
+            } else if (usualBrand == 'Refillable') {
+                // currentPage = 'vapeC';
+                $('section#vapeA').fadeOut();
+                setTimeout(function() {
+                    $('section#vapeC').fadeIn();
+                }, 800);
+            } else if (usualBrand != undefined) {
+                // currentPage = 'vapeB';
+                $('section#vapeA').fadeOut();
+                setTimeout(function() {
+                    $('section#vapeB').fadeIn();
+                }, 800);
+            } else {
+                console.log(usualBrand);
+                console.log('please choose a brand!')
+            }
+            break;
+
+        case 'vapeB':
+            console.log(currentPage);
+            console.log(triedBlu);
+            $('section#vapeB').fadeOut();
+            setTimeout(function() {
+                $('section#final').fadeIn();
+            }, 800);
+            break;
+
+        case 'vapeC':
+            console.log(currentPage);
+            // currentPage = 'final';
+            $('section#vapeC').fadeOut();
+            setTimeout(function() {
+                $('section#final').fadeIn();
+            }, 800);
+            break;
+
+        case 'smoke':
+            console.log(currentPage);
+            // currentPage = 'final';
+            $('section#smoke').fadeOut();
+            setTimeout(function() {
+                $('section#final').fadeIn();
+            }, 800);
+            break;
+
+        default:
+            console.log('Nothing was caught');
+    }
+}
+
+function updateTimestamp() {
+    var currentdate = new Date(); 
+    var datetime = + currentdate.getFullYear() + "-"
+                   + (currentdate.getMonth()+1)  + "-" 
+                   + currentdate.getDate() + " "  
+                   + currentdate.getHours() + ":"  
+                   + currentdate.getMinutes() + ":" 
+                   + currentdate.getSeconds();
+    $('#timestamp').val(datetime);
+}
+
+function validateForm() {
+    var form_data = $('section#dlInfo').serializeArray(),
+        bluEmail = $('#bluForm-email').val(),
+        valid = true;
+
+    if (!isValidEmailAddress(bluEmail)) {
+        console.log('email not valid');
+        valid = false;
+        $('#bluForm-email').toggleClass('warn');
+    }
+
+    for (var input in form_data){
+        var element = $('section#dlInfo'+form_data[input]['name']);
+        var valid = element.hasClass("valid");
+        var error_element=$("span", element.parent());
+        if (!valid) {
+            error_element.removeClass("error").addClass("error_show");
+            valid = false;
+        } else {
+            error_element.removeClass("error_show").addClass("error");
+        }
+    }
+
+    return valid;
+    console.log(valid);
+}
+
+function isValidEmailAddress(bluEmail) {
+    var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+    return pattern.test(bluEmail);
+};
 
 //Local Storage Extensions
 Storage.prototype.getArray = function(arrayName) {
@@ -377,7 +833,7 @@ Storage.prototype.deleteArray = function(arrayName) {
     this.removeItem(arrayName);
 }
 
-// Expanding local storage to deal with arrays
+// Expanding local storage to deal with objects
 Storage.prototype.setObj = function(key, obj) {
     return this.setItem(key, JSON.stringify(obj))
 }

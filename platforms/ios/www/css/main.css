@@ -1,3 +1,22 @@
+#bluLogo {
+  height: 60px;
+  width: auto;
+}
+
+button#scanButton {
+  display: none;
+}
+
+.content-wrap {
+  padding: 30px 0;
+}
+
+h1#main-header {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: bottom;
+}
+
 .form-control.warn,
 .sm-form-control.warn {
   border-color: #E4BF2C;
@@ -5,17 +24,59 @@
 
 .bluForm-sex label {
   margin-right: 10px;
-  padding-left: 6px;
+  padding-left: 8px;
+}
+
+.sm-form-control {
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
 }
 
 .bluForm-dob.sm-form-control {
   display: inline;
 }
 
-#bluForm-dob-d, #bluForm-dob-m {
-  width: 22%;
+#bluForm-dob {
+  width: 80%;
 }
 
-#bluForm-dob-y {
-  width: 30%;
+.optin {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+/* -----------------
+   Survey Styling
+----------------- */
+
+/* Initial Section Hiding */
+
+section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, section#vapeC, section#smoke, div#pastBrands, section#final {
+  display: none;
+}
+
+#bluSurvey {
+  /*display: none;*/
+  position: fixed;
+  background-color: white;
+  z-index: 9;
+  padding: 20px;
+  overflow: scroll;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+#bluSurvey > div {
+  margin: 20px 0 20px 0;
+}
+
+#bluSurvey h4 {
+  margin: 0 0 10px 0;
+}
+
+#bluSurvey label {
+  padding-left: 8px;
+  font-size: 12px;
 }

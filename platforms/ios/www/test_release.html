@@ -1,0 +1,683 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html manifest="mobile/OfflineApp.manifest">
+<head>
+    <title>Dryrain Browser Test Page</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="minimum-scale=1.0, maximum-scale=1, width=device-width, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="YES">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    
+    
+    
+    <style>
+        body {
+            margin:             0;
+            text-align:         left;
+            font-size:          11pt;
+            letter-spacing:     0px;
+            font-weight:        normal;
+            
+            /* The aluminum hole pattern here...
+            background:
+            -webkit-radial-gradient(black 25%, transparent 26%) 0 0,
+            -webkit-radial-gradient(black 25%, transparent 26%) 8px 8px,
+            -webkit-radial-gradient(rgba(255,255,255,.1) 25%, transparent 40%) 0 1px,
+            -webkit-radial-gradient(rgba(255,255,255,.1) 25%, transparent 40%) 8px 9px;
+            background-color:   #282828;
+            background-size:    16px 16px;
+             */
+        }
+
+        .PageTitleClass
+        {
+            text-align:         center;
+            font-size:          15pt;
+            letter-spacing:     0px;
+            font-weight:        bold;
+        }
+    
+        .OperatingModeClass
+        {
+            text-align:         center;
+            font-size:          11pt;
+            letter-spacing:     0px;
+            font-weight:        normal;
+        }
+    
+        .BrowserModeSpan
+        {
+            text-align:         center;
+            font-size:          11pt;
+            letter-spacing:     0px;
+            font-weight:        bold;
+        }
+    
+        .MainPageTextareaClass
+        {
+            overflow:           auto;
+            font-weight:        normal;
+            text-align:         left;
+            font-size:          8pt;
+            letter-spacing:     0px;
+        }
+    
+        .DirectionsClass
+        {
+            overflow:           auto;
+            font-weight:        normal;
+            text-align:         center;
+            font-size:          9pt;
+            letter-spacing:     0px;
+        }
+    
+        div.TestButtonsClass
+        {
+            padding:            10px;
+            width:              100%;
+            height:             300px;
+            overflow:           scroll;
+            background-color:   #DDDDDD;
+            display:            block;
+        }
+    
+    </style>
+    
+    
+    
+    
+    
+    <script type="text/javascript" charset="utf-8">
+    //Initial variable setup
+    var PendingRuntimeInfoRequest = false;
+    
+    function load()
+    {
+        //Initial Load stuff here...
+    }
+
+    /* ************************************************** Incoming Function calls ************************************************** */
+
+    /*
+        Function Name:  DT_BrowserStatusResponse
+        Description:    Called when the framework has completed all loading and injection of Javascript into the WebApp/HTML page
+        Inputs:         None
+        Outputs:        Boolean (true/false) value of Browser Ready Status
+        Notes:          Fired automatically when Browser framework's ready status changes, can also be requested with DT_BrowserStatusRequest()
+    */
+    function DT_BrowserStatusResponse(browserReadyStatus)
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_BrowserStatusResponse:\n browserReadyStatus = " + browserReadyStatus;
+            
+        if (browserReadyStatus)
+        {
+            /* Below are sample commands to run when the Browser Status is READY */
+        
+            //Power up the decoder hardware
+            //DT_DecoderHardwarePowerRequest(true);
+            
+            //Power up the MSR hardware
+            //DT_MSRHardwarePowerRequest(true);
+        
+            //Set the Status Bar for the app
+            //DT_SetStatusBarDisplayRequest(true);
+        
+            //Set Auto-lock status for the app
+            //DT_SetAutoLockRequest(false);
+        
+            //Set allowed orientations for the app (portrait, upsideDown, landscape)
+            //DT_SetSupportedOrientationRequest(true, false, false);
+            
+            //Make a [suppressed] call to DT_RuntimeInformationRequest in order to display the license info at the top of the page
+            PendingRuntimeInfoRequest = true;
+            DT_RuntimeInformationRequest();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    /*
+        Function Name:  DT_AlertBoxResponse
+        Description:    A function called when the user dismisses an alert box by tapping one of the buttons
+        Inputs:         "buttonTitle" : "C1",   //Title of the button that was pressed.
+                    "idNumber" : 63         //The id number of the alert box.
+        Outputs:        An event is disbatched to the DOM with the user's response and the ID number of the alert
+        Notes:          idNumber passed to this function matches the idNumber of the request send out in "DT_AlertBoxRequest()"
+    */
+    function DT_AlertBoxResponse(idNumber, buttonTitle)
+    {    
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_AlertBoxResponse:  \n idNumber = "     + idNumber +
+                                                        "\n buttonTitle = " + buttonTitle;
+    }
+
+
+    /*
+        Function Name:  DT_DecoderDataResponse
+        Description:    Function called when the scanner successfully reads a barcode.
+        Inputs:         "decoderData": "123456789",    //Data read from barcode as a UTF8 string
+                        "rawDecoderData": "XSDFSED"    //Raw data in base64 read from the barcode
+        Outputs:        None
+        Notes:          Returns scan data in both UTF8 and RAW base64 strings
+    */
+    function DT_DecoderDataResponse(decoderData, rawDecoderData)
+    {    
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_DecoderDataResponse:   \n decoderData = "      + decoderData + 
+                                                            "\n rawDecoderData  = " + rawDecoderData;
+    }
+
+
+    /*
+        Function Name:  DT_DeviceConnectionEventResponse
+        Description:    Function called when the status of the scanning sled changes
+        Inputs:         "deviceConnected": true    //Token data as a boolean
+        Outputs:        None
+        Notes:          Used to perform some action when hardware disconnects/reconnects
+    */
+    function DT_DeviceConnectionEventResponse(boolConnectedStatus,deviceName)
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_DeviceConnectionEventResponse: \n boolConnectedStatus = " + boolConnectedStatus + "\n deviceName: " + deviceName;
+    }
+
+
+    /*
+        Function Name:  DT_RuntimeInformationResponse
+        Description:    Information about build, hardware, licenses, etc
+        Inputs:         payload data:
+                        "mfiData":    //This is an array of all attached devices and their attributes.
+                        [
+                            {
+                                "Firmware Revision" : "3.85.0",
+                                "Manufacturer" : "KoamTac",
+                                "Protocol Strings" : [
+                                    "com.koamtac.kdc"
+                                ],
+                                "Name" : "Scanner",
+                                "Hardware Revision" : "1.0.0",
+                                "Model Number" : "KDC",
+                                "Serial Number" : "009091"
+                            },
+                            {
+                                "Firmware Revision" : "45.03",
+                                "Manufacturer" : "Designed and Manufactured by Honeywell Co, Ltd.",
+                                "Protocol Strings" : [
+                                    "com.honeywell.scansled.protocol.decoder",
+                                    "com.honeywell.scansled.protocol.pm",
+                                    "com.honeywell.scansled.protocol.msr"
+                                ],
+                                "Name" : "Captuvo SL42 Enterprise-Enabled Sled",
+                                "Hardware Revision" : "7",
+                                "Model Number" : "SL22-022211-K",
+                                "Serial Number" : "13255B032A"
+                            }
+                        ]
+                        "appVersion": "1.0.0",    //Version of the browser
+                        "displayName": "CaptuvoScan",    //Name displayed to user
+                        "executableName": "CaptuvoScan",    //Name of binary app on device
+                        "bundleID": "com.dryraintechnologies.MFiBrowser",    //Bundle ID
+                        "iOSVersion": "6.1",   //iOS software version number
+                        "iOSPlatform": "iPhone(5,1)",    //iOS platform code
+                        "iOSDeviceIdentifier": "3454-2343-4264-2342-1468"    //Device AD ID
+                        "platformVersion": "2.3.0"    //Assigned version number of the .a lib
+                        "platformBuildDate": "2013112010101"    //Build date of the .a lib
+                        "platformSVNRevision": "3322"    //SVN number of .a lib
+                        "license": "FULL"    //license type
+        Outputs:        None
+        Notes:          Response from DT_RuntimeInformationRequest()
+    */
+    function DT_RuntimeInformationResponse(appVersion,displayName,executableName,bundleID,iOSVersion,iOSPlatform,iOSDeviceIdentifier,platformVersion,platformBuildDate,platformSVNRevision,license,mfiData)
+    {
+        if (PendingRuntimeInfoRequest)
+        {
+            PendingRuntimeInfoRequest = false;
+            
+            var BrowserModeSpan = document.getElementById('BrowserModeSpan');
+            BrowserModeSpan.innerHTML = license;
+            
+            //Show and hide portions of the test page accordingly...
+            switch (license)
+            {
+                case 'WEDGE':
+            
+                break;
+            
+                case 'ADVANCED_WEDGE':
+            
+                break;
+            
+                case 'FULL':
+                    document.getElementById('TestButtons').style.display = "block";
+                break;
+            }
+            
+            
+            return false;
+        }
+        
+        //Implied else...
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_RuntimeInformationResponse:     \n appVersion = "          + appVersion +
+                                                                    "\n displayName = "         + displayName +
+                                                                    "\n executableName = "      + executableName +
+                                                                    "\n bundleID = "            + bundleID +
+                                                                    "\n iOSVersion = "          + iOSVersion +
+                                                                    "\n iOSPlatform= "          + iOSPlatform +
+                                                                    "\n iOSDeviceIdentifier = " + iOSDeviceIdentifier +
+                                                                    "\n platformVersion = "     + platformVersion +
+                                                                    "\n platformBuildDate = "   + platformBuildDate +
+                                                                    "\n platformSVNRevision = " + platformSVNRevision +
+                                                                    "\n license = "             + license +
+                                                                    "\n mfiData = "             + mfiData.toString();
+    }
+
+
+    /*
+        Function Name:  DT_MSRDataResponse
+        Description:    Fires automatically when the browser application enters the background in iOS
+        Inputs:         "msrData": "123409871234098765",    //Data read from barcode as a UTF8 string
+                        "rawMSRData": "LAKSJFLKJOIUALJSDFKJQOIWEUFJA0::"    //Raw data in base64 read from the MSR
+        Outputs:        None
+        Notes:          Returns scan data in both UTF8 and RAW base64 strings
+    */
+    function DT_MSRDataResponse(msrData,rawMSRData)
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_MSRDataResponse:   \n msrData = "      + msrData +
+                                                        "\n rawMSRData = "  + rawMSRData;
+    }
+    
+    
+    /*
+        Function Name:  DT_LocationResponse
+        Description:    Response from Browser Framework with GPS location data and accuracy
+        Inputs:         "latitude" : 72.342123,     //Current Latitude
+                        "longitude" : -123.443,     //Current Longitude
+                        "precision" : 100           //Current precision
+        Outputs:        None
+        Notes:          Uses WiFi location on non-GPS devices and actual a-GPS when available
+    */
+    function DT_LocationResponse(latitude, longitude, precision)
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_LocationResponse:   \n latitude  = " + latitude +
+                                                        "\n longitude = " + longitude +
+                                                        "\n precision = " + precision;
+    }
+    
+    
+    /*
+        Function Name:  DT_DecoderHardwarePowerReadyResponse
+        Description:    This message is sent once the decoder is ready after it is powered on.
+        Inputs:         None
+        Outputs:        None
+        Notes:          Triggered by DecoderHardwarePowerRequest
+    */
+    function DT_DecoderHardwarePowerReadyResponse()
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "Decoder Hardware successfully powered up.";
+    }
+    
+    
+    /*
+        Function Name:  DT_MSRHardwarePowerReadyResponse
+        Description:    This message is sent once the MSR is ready after it is powered on.
+        Inputs:         None
+        Outputs:        None
+        Notes:          Triggered by MSRHardwarePowerRequest 
+    */
+    function DT_MSRHardwarePowerReadyResponse()
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "MSR Hardware successfully powered up.";
+    }
+    
+    
+    /*
+        Function Name:  DT_BatteryStatusResponse
+        Description:    This message is sent when requested by DT_BatteryStatusRequest. A response will be received from every device that is connected.
+        Inputs:         batteryStatus: percentage from framework
+                        deviceName: device name from framework
+        Outputs:        None
+        Notes:          Triggered by DT_BatteryStatusRequest
+     */
+    function DT_BatteryStatusResponse(batteryStatus, deviceName)
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "Device: " + deviceName + "\nBattery Status: " + batteryStatus;
+    }
+    
+    
+    /*
+        Function Name:  DT_ChargeStatusResponse
+        Description:    This message is sent when requested by DT_ChargeStatusRequest. A response will be received from every device that is connected.
+        Inputs:         chargeStatus: String from framework
+                        deviceName: device name from framework
+        Outputs:        None
+        Notes:          Triggered by DT_ChargeStatusRequest
+     */
+    function DT_ChargeStatusResponse(chargeStatus, deviceName)
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "Device: " + deviceName + "\nCharge Status: " + chargeStatus;
+    }
+    
+    
+    /*
+        Function Name:  DT_ApplicationDidEnterBackground
+        Description:    Fires automatically when the browser application enters the background in iOS
+        Inputs:         None
+        Outputs:        None
+        Notes:          Called just before App is backgrounded and put "on hold"
+    */
+    function DT_ApplicationDidEnterBackground()
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_ApplicationDidEnterBackground()";
+    }
+
+
+    /*
+        Function Name:  DT_ApplicationWillEnterForeground
+        Description:    Fires automatically when the browser application is entering the foreground from it's previously backgrounded state
+        Inputs:         None
+        Outputs:        None
+        Notes:          Called just before the App is brought back into view from background status
+    */
+    function DT_ApplicationWillEnterForeground()
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_ApplicationWillEnterForeground()";
+    }
+
+
+    /*
+        Function Name:  DT_ApplicationWillResignActive
+        Description:    Fires automatically when the app is temporaily put on hold while the multitasking bar is accessed, the sleep/lock button is pressed, etc
+        Inputs:         None
+        Outputs:        None
+        Notes:          Called just before the App is sent into it's "Resign Active" state where it is still in the foreground, but not currently in-use by the user
+    */
+    function DT_ApplicationWillResignActive()
+    {
+        //Disable the scanning hardware
+        DT_DecoderHardwarePowerRequest(false);
+        
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_ApplicationWillResignActive()";
+    }
+
+
+    /*
+        Function Name:  DT_ApplicationDidBecomeActive
+        Description:    Fires automatically when the App once again becomes active after sleep, multi-tasking bar goes away, etc
+        Inputs:         None
+        Outputs:        None
+        Notes:          Called immediately after the App returns from "Resigned Active" state where it was in the foreground, but not currently in-use by the user
+    */
+    function DT_ApplicationDidBecomeActive()
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "DT_ApplicationDidBecomeActive()";
+    }
+    
+    function DT_CaptuvoDecoderSerialNumberResponse(serialNumber)
+    {
+        var MainPageTextarea = document.getElementById('MainPageTextarea');
+        MainPageTextarea.value = "Captuvo Decoder Serial Numver: "+serialNumber;
+    }
+    
+</script>
+    
+</head>
+<body onload="load();">
+
+<center>
+<span class="PageTitleClass">Dryrain Browser Test Page</span><br>
+<span class="OperatingModeClass">Currently Operating in </span><b><span class="BrowserModeSpan" id="BrowserModeSpan">UNKNOWN</span></b><span class="OperatingMode"> mode</span><br>
+<textarea id="MainPageTextarea" class="MainPageTextareaClass" rows="5" cols="45"></textarea>
+<span class="DirectionsClass"><br>Scroll through functions Below and watch their output in the textarea above. View the page source to see how to use these functions</span>
+</center>
+<!--
+<br>
+<input type="text" id="testTEXTbox1"><br>
+<input type="text" id="testTEXTbox2"><br>
+<input type="text" id="testTEXTbox3"><br>
+<input type="text" id="testTEXTbox4"><br>
+<input type="text" id="testTEXTbox5"><br>
+-->
+
+<div id="TestButtons" class="TestButtonsClass">
+<p>DT_AlertBoxRequest<br>
+<!--
+    Description:    Function to build a naitive iOS alert box to prompt the user
+    Inputs:         "idNumber"      : 63,                           //Required, ID number for this current alert. This will be returned when the box is dismissed.
+                    "title"         : "Title",                      //Optional, The title of the alert box.
+                    "buttons"       : [ "B1" , "B2" ],              //Optional, 0-Inf buttons that will be displayed with the given name.
+                    "message"       : "This is an alert box!",      //Optional, The message displayed in the alert box'
+                    "cancelButton"  : "C1"                          //Optional, This button is called out and dismisses the alert without action.
+    Outputs:        None
+    Notes:          Button tap responses will be sent to DT_AlertBoxResponse() - usage: DT_AlertBoxRequest(AlertID, "title", 'message', ["Yes","No"],"Cancel");
+-->
+<input type="button" value="Fire Alert" onclick="DT_AlertBoxRequest(12345, 'Alert Title', 'This is an iOS Alert Box', ['OK'],'Cancel');"><br><br>
+</p>
+
+<p>DT_SetStatusBarDisplayRequest<br>
+<!--
+    Description:    Function to set the iOS Status bar at the top of the screen ON or OFF
+    Inputs:         boolean (true/false)
+    Outputs:        None
+    Notes:          Recomended to call this as early possible in program execution after DT_BrowserStatusResponse == true
+-->
+<input type="button" value="Status Bar ON"  onclick="DT_SetStatusBarDisplayRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Status Bar OFF" onclick="DT_SetStatusBarDisplayRequest(false);"><br><br>
+</p>
+
+
+<p>SetAutoLockRequest<br>
+<!--
+    Description:    Function to enable or disable the iOS Auto-lock feature
+    Inputs:         boolean (true/false)
+    Outputs:        None
+    Notes:          Be careful about lowering battery life if the iOS device remains powered up at all times
+-->
+<input type="button" value="iOS Autolock ON"  onclick="DT_SetAutoLockRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="iOS Autolock OFF" onclick="DT_SetAutoLockRequest(false);"><br><br>
+</p>
+
+<p>DT_SetSupportedOrientationRequest<br>
+<!--
+    Description:    Function to set allowed orientations for the WebApp
+    Inputs:         "portrait" : true,      //Optional, boolean, true will support this orientation
+                    "upsideDown" : true,    //Optional, boolean, true will support this orientation
+                    "landscape" : true      //Optional, boolean, true will support this orientation
+    Outputs:        None
+    Notes:          Note order of boolean values (portrait, upsideDown, landscape)
+-->
+<input type="button" value="Portrait Only"      onclick="DT_SetSupportedOrientationRequest(true, false, false);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Upside-Down Only"   onclick="DT_SetSupportedOrientationRequest(false, true, false);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Landscape Only"     onclick="DT_SetSupportedOrientationRequest(false, false, true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="All Orientations"   onclick="DT_SetSupportedOrientationRequest(true, true, true);"><br><br>
+</p>
+
+<p>DT_DecoderHardwarePowerRequest<br>
+<!--
+    Description:    Function to power-up or power-down the hardware decoder
+    Inputs:         boolean (true/false)
+    Outputs:        None
+    Notes:          Leaving the decoder powered up all the time will reduce the accessories battery life
+-->
+<input type="button" value="Power ON"  onclick="DT_DecoderHardwarePowerRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Power OFF" onclick="DT_DecoderHardwarePowerRequest(false);"><br><br>
+</p>
+
+<p>DT_ScanningControlRequest<br>
+<!--
+    Description:    Function to start or stop the scanner (LED's on, looking for barcodes)
+    Inputs:         boolean (true/false)
+    Outputs:        None
+    Notes:          This is usually tied to a software scan button
+-->
+<input type="button" value="Start Scanning" onclick="DT_ScanningControlRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Stop Scanning"  onclick="DT_ScanningControlRequest(false);"><br><br>
+</p>
+
+<p>DT_LoadURLRequest<br>
+<!--
+    Description:    Function to open a URL in the Safari App within iOS
+    Inputs:         "url" : "http://www.coveridapp.com"    //Required, URL to load
+    Outputs:        None
+    Notes:          Program will enter background and Safari will open with this link in the foreground
+-->
+<input type="button" value="Open Google" onclick="DT_LoadURLRequest('http://www.google.com');"><br><br>
+</p>
+
+<p>DT_LogDataRequest<br>
+<!--
+    Description:    Function to send data to the App's CONSOLE for logging/debugging
+    Inputs:         None
+    Outputs:        None
+    Notes:          Use the CONSOLE in the XCODE Organizer window with the iOS device connected via USB to see the log messages
+-->
+<input type="button" value="Log to Console" onclick="DT_LogDataRequest('Message logged to console from browser');"><br><br>
+</p>
+
+<p>DT_DecoderRawCommandRequest<br>
+<!--
+    Description:    Function to program the accessory hardware via RAW pass-through commands
+    Inputs:         Raw programming commands as a single string
+    Outputs:        None
+    Notes:          This is a specific programming string that will vary between hardware devices
+-->
+<input type="button" value="Change Beep Tone" onclick="DT_DecoderRawCommandRequest(String.fromCharCode(22)+'M'+String.fromCharCode(13)+'BEPFQ14200!');">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Set Defaults" onclick="DT_DecoderRawCommandRequest(String.fromCharCode(22)+'M'+String.fromCharCode(13)+'DEFALT.');"><br><br>
+</p>
+
+<p>DT_BrowserStatusRequest<br>
+<!--
+    Description:    Function to request the ready status of the browser framework.  Will return true once framework as started and javascript API layer has been loaded and injected
+    Inputs:         None
+    Outputs:        None
+    Notes:          The call back to this request goes to the function DT_BrowserStatusResponse()
+-->
+<input type="button" value="Get Browser Status" onclick="DT_BrowserStatusRequest();"><br><br>
+</p>
+
+<p>DT_ReloadRequest<br>
+<!--
+    Description:    Function to request a reload of the webapp within the iOS Framework
+    Inputs:         None
+    Outputs:        None
+    Notes:          Often used to refresh WebApp after updates are installed
+-->
+<input type="button" value="Reload" onclick="DT_ReloadRequest();"><br><br>
+</p>
+
+<p>DT_RuntimeInformationRequest<br>
+<!--
+    Description:    Function to request a wide range of data about the runtime parameters
+    Inputs:         None
+    Outputs:        None
+    Notes:          Gets things like hardware type, accessory type, supported features, etc
+-->
+<input type="button" value="Send Info Request" onclick="DT_RuntimeInformationRequest();"><br><br>
+</p>
+
+<p>DT_MSRHardwarePowerRequest<br>
+<!--
+    Description:    Function to power up the MSR hardware
+    Inputs:         BOOLEAN (true/false)
+    Outputs:        None
+    Notes:          No return data back when hardware is started - it just happens
+-->
+<input type="button" value="MSR Power ON"  onclick="DT_MSRHardwarePowerRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="MSR Power OFF" onclick="DT_MSRHardwarePowerRequest(false);"><br><br>
+</p>
+
+<p>DT_LocationRequest<br>
+<!--
+    Description:    Function to request GPS/WiFi coordinates from iOS and return back lat, lon, and accuracy
+    Inputs:         None
+    Outputs:        None
+    Notes:          Non-GPS devices (like iPod touches) get a best-guess from WiFi, or return 0,0,0 for lat, lon, and accuracy
+-->
+<input type="button" value="Request Location" onclick="DT_LocationRequest();"><br><br>
+</p>
+
+
+<p>DT_BatteryStatusRequest<br>
+<!--
+    Function        DT_BatteryStatusRequest:
+    Description:    This message is used request the battery status.
+    Inputs:         None
+    Outputs:        None    Outputs: None
+    Notes:          This message returns data by sending an DT_BatteryStatusResponse message.
+-->
+<input type="button" value="Request Battery Status" onclick="DT_BatteryStatusRequest();"><br><br>
+</p>
+
+<p>DT_ChargeStatusRequest<br>
+<!--
+Function        DT_ChargeStatusRequest:
+Description:    This message is used request the power status.
+Inputs:         None
+Outputs:        None    Outputs: None
+Notes:          This message returns data by sending an DT_ChargeStatusResponse message.
+-->
+<input type="button" value="Request Charge Status" onclick="DT_ChargeStatusRequest();"><br><br>
+</p>
+
+<p>DT_SetEnableHIDModeRequest<br>
+<!--
+ Description:    Function to enable/disable the HID MFi profile support on Gen-2 (and newer?) Captuvos
+ Inputs:         BOOLEAN (true/false)
+ Outputs:        None
+ Notes:          Undocumented feature of SL22 Gen-2 (and newer?) Honeywell sleds
+ -->
+<input type="button" value="HID Mode Enable"  onclick="DT_SetEnableHIDModeRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="HID Mode Disable" onclick="DT_SetEnableHIDModeRequest(false);"><br><br>
+</p>
+
+<p>DT_SetEnableChargeModeRequest<br>
+<!--
+ Description:    Function to enable/disable charging the iOS device from the MFi sled.
+ Inputs:         BOOLEAN (true/false)
+ Outputs:        None
+ Notes:          Undocumented feature of SL22 Gen-2 (and newer?) Honeywell sleds
+ -->
+<input type="button" value="Charge Mode Enable"  onclick="DT_SetEnableChargeModeRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="Charge Mode Disable" onclick="DT_SetEnableChargeModeRequest(false);"><br><br>
+</p>
+
+<p>DT_SetTorchRequest<br>
+<!--
+ Description:    This message is used to turn on and off the LED flash.
+ Inputs:         BOOLEAN (true/false)
+ Outputs:        None
+ Notes:          BRIGHT LIGHT!
+ -->
+<input type="button" value="LED Torch ON"  onclick="DT_SetTorchRequest(true);">&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="button" value="LED Torch OFF" onclick="DT_SetTorchRequest(false);"><br><br>
+</p>
+
+<p>DT_CaptuvoDecoderSerialNumberRequest<br>
+<input type="button" value="Request Captuve Decoder SN" onclick="DT_CaptuvoDecoderSerialNumberRequest();">
+<br><br>
+</p>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+    
