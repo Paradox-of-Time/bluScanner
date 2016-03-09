@@ -21,61 +21,48 @@
     <head>
         <meta charset="utf-8" />
         <meta name="format-detection" content="telephone=no" />
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=medium-dpi" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         
         <!-- External Styles -->
         <link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
         <link rel="stylesheet" href="css/style.css" type="text/css" />
-        <link rel="stylesheet" href="css/dark.css" type="text/css" />
-        <link rel="stylesheet" href="css/font-icons.css" type="text/css" />
+        <!-- <link rel="stylesheet" href="css/dark.css" type="text/css" /> -->
+        <!-- <link rel="stylesheet" href="css/font-icons.css" type="text/css" /> -->
         <link rel="stylesheet" href="css/animate.css" type="text/css" />
-        <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" />
+        <!-- <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" /> -->
         <link rel="stylesheet" href="css/responsive.css" type="text/css" />
         <link rel="stylesheet" href="css/main.css" type="text/css" />
 
         <!-- External JS -->
         <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jquery.tap.js"></script>
         <script type="text/javascript" src="js/plugins.js"></script>
         <script type="text/javascript" src="js/jquery.serializejson.min.js"></script>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <!--[if lt IE 9]>
             <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
         <![endif]-->
         <title>blu Scanner</title>
     </head>
     <body>
-      <section id="page-title">
-
-        <div class="container clearfix">
-          
-          <img src="img/blu-logo.jpg" id="bluLogo" alt="blu">
-          <h1 id="main-header">ID Scanner</h1>
-          <!-- <button id="hardwareScan" class="button button-large button-dark clear">HW Scan</button> -->
-          <button id="scanButton" class="button button-large button-dark clear">Camera Scan</button>
-          <!-- <button id="clearStorage" class="button button button-dark clear">Clear Local Storage</button> -->
-        </div>
-
-      </section>
 
       <section id="hiddenMenu">
-        <div class="container clearfix">
-          <div class="col_one_third">
+        <div id="devMenu">
+          <span class="close" id="closeButton">&times;</span>
+          <div class="field container clearfix">
             <input placeholder="Device ID" id="deviceIDField" type="text" class="sm-form-control" /><button id="setDeviceID" class="button-small button">Set ID</button>
+            Current Device ID: <span id="currentDeviceID">No ID Set.</span>
           </div>
-          <div class="col_one_third col_last">Current Device ID: <span id="currentDeviceID">No ID Set.</span></div>
-        </div>
-        <div class="container clearfix">
-          <div class="col_half">
-            <!-- <label for="bluForm-state">State</label> -->
+          <div class="field container clearfix">
             <select placeholder="Event ID" id="eventIDField" name="eventID" class="sm-form-control">
               <option value="" disabled selected>Choose Event</option>
-              <option value="468725">Test Event</option>
-              <option value="">Alaska</option>
             </select><button id="setEventID" class="button-small button">Set ID</button>
+            Current Event ID: <span id="currentEventID">No ID Set.</span>
           </div>
-          <div class="col_one_third col_last">Current Event ID: <span id="currentEventID">No ID Set.</span></div>
+          <div class="container clearfix">
+            <a href="#" id="updateEventList" class="button button-3d fcenter">Update Event List</a>
+          </div>
         </div>
       </section>
 
@@ -87,36 +74,37 @@
 
               <div class="row clearfix">
                 <div class="col-md-6">
+                  <img src="img/blu-logo.png" id="bluLogo" alt="blu">
                   <h3>About You</h3>
 
                   <div class="clear"></div>
-                  <a href="#" id="submit" class="button button-3d fcenter">Submit</a>
+                  <!-- TESTING ONLY <a href="#" id="submit" class="button button-3d fcenter">Submit</a> -->
 
                   <form id="bluForm" name="bluForm" class="nobottommargin" action="#" method="post">
                     <section id="dlInfo">
                       <div class="col_half">
                         <!-- <label for="bluForm-name">First Name:</label> -->
-                        <input placeholder="First Name" type="text" id="bluForm-name" name="first_name" value="" class="sm-form-control" />
+                        <input placeholder="First Name" type="text" id="bluForm-name" name="first_name" value="" class="sm-form-control required" />
                       </div>
 
                       <div class="col_half col_last">
                         <!-- <label for="bluForm-lname">Last Name:</label> -->
-                        <input placeholder="Last Name" type="text" id="bluForm-lname" name="last_name" value="" class="sm-form-control" />
+                        <input placeholder="Last Name" type="text" id="bluForm-lname" name="last_name" value="" class="sm-form-control required" />
                       </div>
 
                       <div class="clear"></div>
 
                       <div class="col_half">
                         <label for="bluForm-dob">DOB:&nbsp;</label>
-                        <input type="text" id="bluForm-dob" name="dob" value="" placeholder="YYYY-MM-DD" class="bluForm-dob sm-form-control" />
+                        <input type="text" id="bluForm-dob" name="dob" value="" placeholder="YYYY-MM-DD" class="bluForm-dob sm-form-control required" />
                       </div>
 
                       <div class="col_half col_last">
                         <!-- <label for="bluForm-sex">Gender:</label> -->
                         <div class="bluForm-sex">
-                          <input type="radio" name="gender" id="bluForm-sex-f" class="bluForm-sex" value="Female"><label for="bluForm-sex-f">Female</label>
-                          <input type="radio" name="gender" id="bluForm-sex-m" class="bluForm-sex" value="Male"><label for="bluForm-sex-m">Male</label>
-                          <input type="radio" name="gender" id="bluForm-sex-n" class="bluForm-sex" value="NA" checked="checked"><label for="bluForm-sex-n">N/A</label>
+                          <input type="radio" name="gender" id="bluForm-sex-f" class="bluForm-sex required" value="Female"><label for="bluForm-sex-f">Female</label>
+                          <input type="radio" name="gender" id="bluForm-sex-m" class="bluForm-sex required" value="Male"><label for="bluForm-sex-m">Male</label>
+                          <input type="radio" name="gender" id="bluForm-sex-n" class="bluForm-sex required" value="NA"><label for="bluForm-sex-n">N/A</label>
                         </div>
                       </div>
 
@@ -124,7 +112,7 @@
 
                       <div class="col_half">
                         <!-- <label for="bluForm-address">Address:</label> -->
-                        <input placeholder="Street Address" type="text" id="bluForm-address1" name="address" value="" class="sm-form-control" />
+                        <input placeholder="Street Address" type="text" id="bluForm-address1" name="address" value="" class="sm-form-control required" />
                       </div>
 
                       <div class="col_half col_last">
@@ -134,12 +122,12 @@
 
                       <div class="col_full">
                         <!-- <label for="bluForm-city">City</label> -->
-                        <input placeholder="City" type="text" id="bluForm-city" name="city" value="" class="sm-form-control" />
+                        <input placeholder="City" type="text" id="bluForm-city" name="city" value="" class="sm-form-control required" />
                       </div>
 
                       <div class="col_half">
                         <!-- <label for="bluForm-state">State</label> -->
-                        <select placeholder="State" id="bluForm-state" name="state" class="sm-form-control">
+                        <select placeholder="State" id="bluForm-state" name="state" class="sm-form-control required">
                           <option value="" disabled selected>State</option>
                           <option value="AL">Alabama</option>
                           <option value="AK">Alaska</option>
@@ -204,31 +192,32 @@
 
                       <div class="col_half col_last">
                         <!-- <label for="bluForm-zip">Zip</label> -->
-                        <input placeholder="Postal Code" type="text" id="bluForm-zip" name="zip" value="" class="sm-form-control" />
+                        <input placeholder="Postal Code" type="text" id="bluForm-zip" name="zip" value="" maxlength="5" class="sm-form-control required" />
                       </div>
 
                       <div class="clear"></div>
 
                       <div class="col_half">
-                        <input placeholder="Email" type="email" id="bluForm-email" name="email" value="" class="sm-form-control" />
+                        <input placeholder="Email" type="email" id="bluForm-email" name="email" value="" class="sm-form-control required" />
                       </div>
 
                       <div class="col_half col_last">
-                        <input placeholder="Phone" type="tel" id="bluForm-phone" name="phone" value="" class="sm-form-control" />
+                        <input placeholder="Phone" type="tel" id="bluForm-phone" name="phone" value="" class="sm-form-control required" />
                       </div>
 
                       <div>
                         <h4>Do you want to opt-in to blu Nation?</h4>
-                        <input type="radio" name="communication_opt_in" id="optin-y" value="Yes"><label class="optin" for="optin-y">Yes</label>
-                        <input type="radio" name="communication_opt_in" id="optin-n" value="No"><label class="optin" for="optin-n">No</label>
+                        <input type="radio" name="opt_in" id="optin-y" value="true"><label class="optin required" for="optin-y">Yes</label>
+                        <input type="radio" name="opt_in" id="optin-n" value="false"><label class="optin required" for="optin-n">No</label>
                       </div>
 
                     </section>
 
                     <div>
                       <input type="hidden" name="device_id" id="device_id">
-                      <input type="hidden" name="event_id" id="event_id">
+                      <input type="hidden" name="events_id" id="events_id">
                       <input type="hidden" name="timestamp" id="timestamp">
+                      <input type="hidden" name="communication_opt_in" id="optin2">
                     </div>
 
                     <button id="startSurvey" type="button" class="button-small button">Start Survey</button>
@@ -363,8 +352,8 @@
 
                         <div>
                           <h4>I see you didn't opt-in to blu Nation&hellip; do you want to opt-in to receive more offers and communication?</h4>
-                          <input type="radio" name="communication_opt_in" id="optin2-y" value="Yes"><label class="optin" for="optin2-y">Yes</label>
-                          <br><input type="radio" name="communication_opt_in" id="optin2-n" value="No"><label class="optin" for="optin2-n">No</label>
+                          <input type="radio" name="communication_opt_in" id="optin2-y" value="true"><label class="optin" for="optin2-y">Yes</label>
+                          <br><input type="radio" name="communication_opt_in" id="optin2-n" value="false"><label class="optin" for="optin2-n">No</label>
                         </div> -->
 
                         <div class="clear"></div>
@@ -397,5 +386,6 @@
         <script type="text/javascript" src="js/DryrainJSLibrary.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <script type="text/javascript" src="js/functions.js"></script>
+        <script type="text/javascript" src="js/jquery.mask.js"></script>
     </body>
 </html>

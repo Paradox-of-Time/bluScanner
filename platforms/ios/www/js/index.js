@@ -33,11 +33,13 @@ var formData,
     submitFired,
     backlogFired,
     triedblu,
-    triedEcig;
+    triedEcig,
+    clickTimer = null;
 
 $('document').ready(function() {
     updateDeviceID();
     updateEventID();
+    getEvents();
     $('#bluForm-dob').mask('0000-00-00');
     $('#bluForm-zip').mask('00000');
     $('#bluForm-phone').mask('000-000-0000');
@@ -122,10 +124,32 @@ jQuery(function($) {
         }
     });
 
+    // triple click to show hidden menu
+    $('#bluLogo').on('tap', function(event) {
+        event.preventDefault();
+        if (clickTimer == null) {
+            clickTimer = 1;
+            setTimeout(function () {
+                clickTimer = null;
+            }, 500)
+        } else if (clickTimer == 1) {
+            clickTimer = 2;
+        } else if (clickTimer == 2) {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            $('#hiddenMenu').fadeIn();
+        }
+    });
+
+    // hidden menu close button
+    $('#closeButton').click(function() {
+        $('#hiddenMenu').fadeOut();
+    });
+
     $('#setDeviceID').click(function() {
         var deviceID = $('#deviceIDField').val();
         if (!deviceID) {
-            window.alert('Please enter a valid ID!')
+            alert('Please enter a valid ID!')
         } else {
             localStorage['deviceID'] = deviceID;
             updateDeviceID();
@@ -135,7 +159,7 @@ jQuery(function($) {
     $('#setEventID').click(function() {
         var eventID = $('select[name="eventID"]').val();
         if (!eventID) {
-            window.alert('Please select an event!')
+            alert('Please select an event!')
         } else {
             localStorage['eventID'] = eventID;
             updateEventID();
@@ -298,6 +322,7 @@ jQuery(function($) {
 
     $('#startSurvey').click(function() {
         if (validateForm()) {
+            // $('#opt_in2').val($('#opt_in').val());
             $('#bluSurvey').fadeIn();
         }
     });
@@ -327,12 +352,16 @@ jQuery(function($) {
         goNext(currentSurveySection);
     });
 
-    $('#getEvents').click(updateEvents);
+    function validateSurveySection(currentSurveySection) {
+        var sectionValid = true;
 
-    function updateEvents() {
-
+        $('#bluSurvey').find('input.required').filter(function() {
+        if( $(this).val().length === 0) {
+            $(this).addClass('warn');
+            valid = false;
+        }
+    });
     }
-
     
 });
 
@@ -421,6 +450,10 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
         ZIP = dlParsedObject.postalCode,
         DOB = dlParsedObject.birthdate,
         SEX = dlParsedObject.gender;
+
+    // reset the form
+    $('#bluForm')[0].reset();
+    $('.warn').removeClass('warn');
     
     if (FNAME) {
         $('#bluForm-name').val(FNAME);
@@ -458,7 +491,8 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
     }
 
     if (ZIP) {
-        $('#bluForm-zip').val(ZIP);
+        var parsedZIP = ZIP.substr(0,5);
+        $('#bluForm-zip').val(parsedZIP);
     } else {
         console.log(ZIP + ' is undefined');
         $('#bluForm-zip').toggleClass('warn');
@@ -470,11 +504,9 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
             // invalid date handling
         }
 
-        // $('#bluForm-email').val(fields[kPPDateOfBirth]);
-
-        var d = str.substr(4,2),
-            m = str.substr(0,2),
-            y = str.substr(2,4);
+        var d = str.substr(6,2),
+            m = str.substr(4,2),
+            y = str.substr(0,4);
 
         $('#bluForm-dob').val(y + '-' + m + '-' + d);
     } else {
@@ -483,8 +515,6 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
 
     if (SEX) {
         sex = (SEX);
-
-        $('#bluForm-email').val(sex);
 
         if ((sex == '1') || (sex == 'male') || (sex == 'MALE') || (sex == 'Male')) {
             $('#bluForm-sex-m').prop('checked', true);
@@ -501,89 +531,59 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
 
 // Get List of events
 $('#updateEventList').click(function() {
-    $.ajax({
-        type: 'POST',
-        url: 'http://blu.momentum.networkninja.com/api/v1/events',
-        data: {device_id : "ABCD"},
-        dataType: 'json',
-        success: function(response) {
-            console.log(response);
-        },
-        statusCode: {
-            200: function (response) {
-                console.log('Success!')
-            },
-            400: function (response) {
-                console.log('Bad Request')
-            },
-            400: function (response) {
-                console.log('Bad Request')
-            },
-            404: function (response) {
-                console.log('Unknown Method')
-            },
-            500: function (response) {
-                console.log(response.responseText);
-            },
-            503: function (response) {
-                console.log('Service unavailable')
-            }
-        },
-        error: function (e) {
-            console.log("Server error - " + e.error);
-        }
-    })
+    getEvents();
 });
 
 $('#submit').click(function (event) {
     event.preventDefault();
     updateTimestamp();
     updateEventID();
-    // formData = $('#bluForm').serializeJSON();
+    formData = [$('#bluForm').serializeJSON()];
 
-    formData = [{
-        "events_id": 481028,
-        "first_name": "James",
-        "last_name": "Bond",
-        "address": "1600 Amphitheater Parkway",
-        "address_2": "",
-        "city": "Mountain View",
-        "state": "CA",
-        "zip": "94043",
-        "gender": "male",
-        "dob": "1980-02-22",
-        "phone": "773-555-1212",
-        "email": "user@email.com",
-        "device_id": "ABCD",
-        "timestamp": "2014-02-12 17:03:21",
-        "opt_in": "false",
-        "coupon_code": "A64",
-        "communication_opt_in": "true",
-        "sampling_flavor": "Express Kit",
-        "current_product_use": "Both",
-        "tried_ecig": "Yes",
-        "ecig_brands_tried": [
-            "BLU",
-            "Mark10"
-        ],
-        "vape_use_duration": "6MO - 1YR",
-        "mod_or_ecig": "MOD",
-        "why_mod": "MORE POWERFUL",
-        "current_ecig_brand": "VUSE",
-        "tried_blu": "No",
-        "blu_no_reason": "Free form response",
-        "blu_nation_opt_in": "Yes",
-        "liked_sample": "No",
-        "liked_no_reason": "It tasted bad"
-    }];
+    // formData = [{
+    //     "events_id": 481028,
+    //     "first_name": "James",
+    //     "last_name": "Bond",
+    //     "address": "1600 Amphitheater Parkway",
+    //     "address_2": "",
+    //     "city": "Mountain View",
+    //     "state": "CA",
+    //     "zip": "94043",
+    //     "gender": "male",
+    //     "dob": "1980-02-22",
+    //     "phone": "773-555-1212",
+    //     "email": "user@email.com",
+    //     "device_id": "ABCD",
+    //     "timestamp": "2014-02-12 17:03:21",
+    //     "opt_in": "false",
+    //     "coupon_code": "A64",
+    //     "communication_opt_in": "true",
+    //     "sampling_flavor": "Express Kit",
+    //     "current_product_use": "Both",
+    //     "tried_ecig": "Yes",
+    //     "ecig_brands_tried": [
+    //         "BLU",
+    //         "Mark10"
+    //     ],
+    //     "vape_use_duration": "6MO - 1YR",
+    //     "mod_or_ecig": "MOD",
+    //     "why_mod": "MORE POWERFUL",
+    //     "current_ecig_brand": "VUSE",
+    //     "tried_blu": "No",
+    //     "blu_no_reason": "Free form response",
+    //     "blu_nation_opt_in": "Yes",
+    //     "liked_sample": "No",
+    //     "liked_no_reason": "It tasted bad"
+    // }];
 
     $.ajax({
         type: "POST",
         url: "http://blu.momentum.networkninja.com/api/v1/save",
         dataType: "json",
-        data: formData[0],
+        data: {data : JSON.stringify(formData)},
         success: function(result) {
             console.log('success! ' + result);
+            alert('Data has been successfully submitted!');
         },
         statusCode: {
             200: function (response) {
@@ -606,7 +606,7 @@ $('#submit').click(function (event) {
             }
         },
         error: function (e) {
-            console.log("Server error - " + e.error);
+            alert('Something went wrong when submitting.');
         }
     });
 
@@ -651,7 +651,57 @@ function updateEventID() {
     var latestEventID = localStorage['eventID'];
     console.log('Event ID = ' + latestEventID);
     $('#currentEventID').html(latestEventID);
-    $('#event_id').val(latestEventID);
+    $('#events_id').val(latestEventID);
+}
+
+function getEvents() {
+    deviceID = localStorage['deviceID'];
+
+    if (deviceID) {
+        var eventObject = [];
+
+        $.ajax({
+            type: 'POST',
+            url: 'http://blu.momentum.networkninja.com/api/v1/events',
+            data: {device_id : deviceID},
+            dataType: 'json',
+            success: function(response) {
+                eventObject = response;
+                console.log(eventObject[0].id);
+
+                for(var i=0;i<eventObject.length;i++) {
+                    var option = $('<option value="'+ eventObject[i].id +'"></option>').text(eventObject[i].name + ' in ' + eventObject[i].city);
+                    $('select#eventIDField').append(option);
+                }
+            },
+            statusCode: {
+                200: function (response) {
+                    console.log('Success! Events list updated.')
+                },
+                400: function (response) {
+                    console.log('Bad Request')
+                },
+                400: function (response) {
+                    console.log('Bad Request')
+                },
+                404: function (response) {
+                    console.log('Unknown Method')
+                },
+                500: function (response) {
+                    console.log(response.responseText);
+                    alert('Invalid Device ID!');
+                },
+                503: function (response) {
+                    console.log('Service unavailable')
+                }
+            },
+            error: function (e) {
+                console.log("Server error - " + e.error);
+            }
+        })
+    } else {
+        alert('Please verify the device ID.');
+    }
 }
 
 function goNext(currentPage) {
@@ -756,8 +806,8 @@ function updateTimestamp() {
 }
 
 function validateForm() {
-    var form_data = $('section#dlInfo').serializeArray(),
-        bluEmail = $('#bluForm-email').val(),
+
+    var bluEmail = $('#bluForm-email').val(),
         valid = true;
 
     if (!isValidEmailAddress(bluEmail)) {
@@ -766,22 +816,18 @@ function validateForm() {
         $('#bluForm-email').toggleClass('warn');
     }
 
-    for (var input in form_data){
-        var element = $('section#dlInfo'+form_data[input]['name']);
-        var valid = element.hasClass("valid");
-        var error_element=$("span", element.parent());
-        if (!valid) {
-            error_element.removeClass("error").addClass("error_show");
+    $('#bluForm').find('input.required').filter(function() {
+        if( $(this).val().length === 0 ) {
+            $(this).addClass('warn');
             valid = false;
-        } else {
-            error_element.removeClass("error_show").addClass("error");
         }
-    }
+    });
 
-    return valid;
     console.log(valid);
+    return valid;
 }
 
+// email validation
 function isValidEmailAddress(bluEmail) {
     var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
     return pattern.test(bluEmail);

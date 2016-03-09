@@ -68,8 +68,55 @@ section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, 
   left: 0;
 }
 
+/* 1136 x 640 */
+#hiddenMenu {
+  z-index: 999 !important;
+  position: fixed;
+  background-color: rgba(55,55,55,.8);
+  background-size: cover;
+  padding: 30px;
+  width: 100%;
+  height: 100%;
+}
+
+#hiddenMenu > div#devMenu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  height: 350px;
+  width: 310px;
+  margin-top: -175px;
+  margin-left: -155px;
+  background-color: white;
+  z-index: 999 !important;
+  font-size: 12px;
+}
+
+#hiddenMenu div.container.field {
+  padding: 30px;
+  width: 310px !important;
+}
+
+#hiddenMenu input,
+#hiddenMenu select {
+  width: 100%;
+}
+
+#hiddenMenu a#updateEventList,
+#hiddenMenu .container {
+  margin: 0 auto;
+}
+
+#closeButton {
+  padding: 10px;
+}
+
 #bluSurvey > div {
   margin: 20px 0 20px 0;
+}
+
+#bluSurvey section > div {
+  margin-bottom: 20px;
 }
 
 #bluSurvey h4 {
