@@ -71,11 +71,21 @@
           <div class="content-wrap">
 
             <div class="container clearfix">
+              <div class="row clearfix">
+                <div class="col-xs-5">
+                  <img src="img/blu-logo.png" id="bluLogo" alt="blu">
+                  <h3>About You</h3>
+                </div>
+                <div class="col-xs-7">
+                  <h5 id="deviceIDError">No Device ID Entered!</h5>
+                  <h5 id="eventIDError">No Event ID Selected!</h5>
+                </div>
+              </div>
 
               <div class="row clearfix">
                 <div class="col-md-6">
-                  <img src="img/blu-logo.png" id="bluLogo" alt="blu">
-                  <h3>About You</h3>
+                  <!-- <img src="img/blu-logo.png" id="bluLogo" alt="blu">
+                  <h3>About You</h3> -->
 
                   <div class="clear"></div>
                   <!-- TESTING ONLY <a href="#" id="submit" class="button button-3d fcenter">Submit</a> -->
@@ -217,6 +227,7 @@
                       <input type="hidden" name="device_id" id="device_id">
                       <input type="hidden" name="events_id" id="events_id">
                       <input type="hidden" name="timestamp" id="timestamp">
+                      <input type="hidden" name="coupon_code" id="couponCode" />
                       <input type="hidden" name="communication_opt_in" id="optin2">
                     </div>
 
@@ -330,7 +341,7 @@
                         <!-- <label for="bluForm-state">State</label> -->
                           <select placeholder="Sample" id="bluForm-sample" name="sampling_flavor" class="sm-form-control">
                             <option value="" disabled selected>Sample</option>
-                            <option value="Express Kit">Express Kit</option>
+                            <option value="Xpress Kit">Xpress Kit</option>
                             <option value="PLUS">PLUS</option>
                             <option value="Tank | Classic Tobacco">Tank | Classic Tobacco</option>
                             <option value="Tank | Magnificent Menthol">Tank | Magnificent Menthol</option>
@@ -358,10 +369,9 @@
 
                         <div class="clear"></div>
 
-                        <div class="col_one_fourth">
-                          <!-- <label for="bluForm-zip">Zip</label> -->
+                        <!-- <div class="col_one_fourth">
                           <input placeholder="Coupon Code" type="text" id="couponCode" name="coupon_code" value="" class="sm-form-control" />
-                        </div>
+                        </div> -->
 
                           <div class="clear"></div>
                           <a href="#" id="submit" class="button button-3d fcenter">Submit</a>

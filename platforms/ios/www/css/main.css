@@ -3,6 +3,16 @@
   width: auto;
 }
 
+h5 {
+  vertical-align: text-bottom;
+  color: red;
+  margin-top: 10px;
+}
+
+#deviceIDError, #eventIDError {
+  display: none;
+}
+
 button#scanButton {
   display: none;
 }

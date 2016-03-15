@@ -153,6 +153,8 @@ jQuery(function($) {
         } else {
             localStorage['deviceID'] = deviceID;
             updateDeviceID();
+            // Get list of events based on latest device ID
+            getEvents();
         }
     });
 
@@ -440,7 +442,134 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
     
     // Alert the user with a naitive iOS alert box of the scan data
     // DT_AlertBoxRequest(12345, 'Scan Data', 'first name: ' + dlParsedObject.firstName, ['OK']);
-    
+
+
+    // fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, symbologyType, dlParsedObject) 
+    fillFormFields(decoderData, rawDecoderData, null, null, symbologyType, dlParsedObject);
+}
+
+function DT_MSRDataResponse(msrData, msrDecoderData, dlParsedObject) {
+    fillFormFields(null, null, msrData, msrDecoderData, null, dlParsedObject);
+}
+
+// Get List of events
+$('#updateEventList').click(function() {
+    getEvents();
+});
+
+$('#submit').click(function (event) {
+    event.preventDefault();
+    updateTimestamp();
+    updateEventID();
+    formData = [$('#bluForm').serializeJSON()];
+
+    // formData = [{
+    //     "events_id": 481028,
+    //     "first_name": "James",
+    //     "last_name": "Bond",
+    //     "address": "1600 Amphitheater Parkway",
+    //     "address_2": "",
+    //     "city": "Mountain View",
+    //     "state": "CA",
+    //     "zip": "94043",
+    //     "gender": "male",
+    //     "dob": "1980-02-22",
+    //     "phone": "773-555-1212",
+    //     "email": "user@email.com",
+    //     "device_id": "ABCD",
+    //     "timestamp": "2014-02-12 17:03:21",
+    //     "opt_in": "false",
+    //     "coupon_code": "A64",
+    //     "communication_opt_in": "true",
+    //     "sampling_flavor": "Express Kit",
+    //     "current_product_use": "Both",
+    //     "tried_ecig": "Yes",
+    //     "ecig_brands_tried": [
+    //         "BLU",
+    //         "Mark10"
+    //     ],
+    //     "vape_use_duration": "6MO - 1YR",
+    //     "mod_or_ecig": "MOD",
+    //     "why_mod": "MORE POWERFUL",
+    //     "current_ecig_brand": "VUSE",
+    //     "tried_blu": "No",
+    //     "blu_no_reason": "Free form response",
+    //     "blu_nation_opt_in": "Yes",
+    //     "liked_sample": "No",
+    //     "liked_no_reason": "It tasted bad"
+    // }];
+
+    $.ajax({
+        type: "POST",
+        url: "http://blu.momentum.networkninja.com/api/v1/save",
+        dataType: "json",
+        data: {data : JSON.stringify(formData)},
+        success: function(result) {
+
+            alert('Data has been successfully submitted!');
+
+            setTimeout(function(){
+                 window.location.reload();
+            }, 2000);
+        },
+        statusCode: {
+            200: function (response) {
+                console.log('Success!')
+            },
+            400: function (response) {
+                console.log('Bad Request')
+            },
+            400: function (response) {
+                console.log('Bad Request')
+            },
+            404: function (response) {
+                console.log('Unknown Method')
+            },
+            500: function (response) {
+                console.log(response.responseText);
+                alert('Invalid Device ID!');
+            },
+            503: function (response) {
+                console.log('Service unavailable')
+            }
+        },
+        error: function (e) {
+            alert('Something went wrong when submitting.');
+        }
+    });
+
+    // for (var i = 0; i < (data.length); i++) {
+    //     console.log(data[i]);
+    //     if (data[i] != formData) {
+    //         // if data isn't a duplicate
+
+    //         console.log('not a duplicate!');
+
+    //         var jsonData = JSON.stringify(data[i]);
+
+    //         console.log(jsonData);
+
+    //         $.ajax({
+    //             type: "POST",
+    //             url: "http://blu.momentum-stage.networkninja.com.com/api/v1/api.php",
+    //             data: jsonData
+    //         }).done(function(response) {
+    //             console.log("Successfully submitted: " + response);
+    //             signupComplete();
+    //             submitFired = true;
+    //         }).fail(function(response) {
+    //             console.log("Submitting failed:" + response);
+    //             window.localStorage.pushArrayItem('data', formData);
+    //             submitFired = false;
+    //         });
+    //     }
+    // }
+
+    // return false; // prevent page refresh
+});
+
+function fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, symbologyType, dlParsedObject) {
+
     var FNAME = dlParsedObject.firstName,
         LNAME = dlParsedObject.lastName,
         ADDRESS1 = dlParsedObject.address1,
@@ -526,132 +655,30 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
     } else {
         console.log('Gender is undefined')
     }
-    
 }
-
-// Get List of events
-$('#updateEventList').click(function() {
-    getEvents();
-});
-
-$('#submit').click(function (event) {
-    event.preventDefault();
-    updateTimestamp();
-    updateEventID();
-    formData = [$('#bluForm').serializeJSON()];
-
-    // formData = [{
-    //     "events_id": 481028,
-    //     "first_name": "James",
-    //     "last_name": "Bond",
-    //     "address": "1600 Amphitheater Parkway",
-    //     "address_2": "",
-    //     "city": "Mountain View",
-    //     "state": "CA",
-    //     "zip": "94043",
-    //     "gender": "male",
-    //     "dob": "1980-02-22",
-    //     "phone": "773-555-1212",
-    //     "email": "user@email.com",
-    //     "device_id": "ABCD",
-    //     "timestamp": "2014-02-12 17:03:21",
-    //     "opt_in": "false",
-    //     "coupon_code": "A64",
-    //     "communication_opt_in": "true",
-    //     "sampling_flavor": "Express Kit",
-    //     "current_product_use": "Both",
-    //     "tried_ecig": "Yes",
-    //     "ecig_brands_tried": [
-    //         "BLU",
-    //         "Mark10"
-    //     ],
-    //     "vape_use_duration": "6MO - 1YR",
-    //     "mod_or_ecig": "MOD",
-    //     "why_mod": "MORE POWERFUL",
-    //     "current_ecig_brand": "VUSE",
-    //     "tried_blu": "No",
-    //     "blu_no_reason": "Free form response",
-    //     "blu_nation_opt_in": "Yes",
-    //     "liked_sample": "No",
-    //     "liked_no_reason": "It tasted bad"
-    // }];
-
-    $.ajax({
-        type: "POST",
-        url: "http://blu.momentum.networkninja.com/api/v1/save",
-        dataType: "json",
-        data: {data : JSON.stringify(formData)},
-        success: function(result) {
-            console.log('success! ' + result);
-            alert('Data has been successfully submitted!');
-        },
-        statusCode: {
-            200: function (response) {
-                console.log('Success!')
-            },
-            400: function (response) {
-                console.log('Bad Request')
-            },
-            400: function (response) {
-                console.log('Bad Request')
-            },
-            404: function (response) {
-                console.log('Unknown Method')
-            },
-            500: function (response) {
-                console.log('Something went wrong')
-            },
-            503: function (response) {
-                console.log('Service unavailable')
-            }
-        },
-        error: function (e) {
-            alert('Something went wrong when submitting.');
-        }
-    });
-
-    // for (var i = 0; i < (data.length); i++) {
-    //     console.log(data[i]);
-    //     if (data[i] != formData) {
-    //         // if data isn't a duplicate
-
-    //         console.log('not a duplicate!');
-
-    //         var jsonData = JSON.stringify(data[i]);
-
-    //         console.log(jsonData);
-
-    //         $.ajax({
-    //             type: "POST",
-    //             url: "http://blu.momentum-stage.networkninja.com.com/api/v1/api.php",
-    //             data: jsonData
-    //         }).done(function(response) {
-    //             console.log("Successfully submitted: " + response);
-    //             signupComplete();
-    //             submitFired = true;
-    //         }).fail(function(response) {
-    //             console.log("Submitting failed:" + response);
-    //             window.localStorage.pushArrayItem('data', formData);
-    //             submitFired = false;
-    //         });
-    //     }
-    // }
-
-    // return false; // prevent page refresh
-});
 
 function updateDeviceID() {
     var latestDeviceID = localStorage['deviceID'];
-    console.log('Device ID = ' + latestDeviceID);
-    $('#currentDeviceID').html(latestDeviceID);
-    $('#device_id').val(latestDeviceID);
+    if (latestDeviceID) {
+        console.log('Device ID = ' + latestDeviceID);
+        $('#currentDeviceID').html(latestDeviceID);
+        $('#device_id').val(latestDeviceID);
+        $('#deviceIDError').fadeOut();
+    } else {
+        $('#deviceIDError').fadeIn();
+    }
 }
 
 function updateEventID() {
     var latestEventID = localStorage['eventID'];
-    console.log('Event ID = ' + latestEventID);
-    $('#currentEventID').html(latestEventID);
-    $('#events_id').val(latestEventID);
+    if (latestEventID) {
+        console.log('Event ID = ' + latestEventID);
+        $('#currentEventID').html(latestEventID);
+        $('#events_id').val(latestEventID);
+        $('#eventIDError').fadeOut();
+    } else {
+        $('#eventIDError').fadeIn();
+    }
 }
 
 function getEvents() {
@@ -667,11 +694,15 @@ function getEvents() {
             dataType: 'json',
             success: function(response) {
                 eventObject = response;
-                console.log(eventObject[0].id);
+                if (eventObject[0]) {
+                    console.log(eventObject[0].id);
 
-                for(var i=0;i<eventObject.length;i++) {
-                    var option = $('<option value="'+ eventObject[i].id +'"></option>').text(eventObject[i].name + ' in ' + eventObject[i].city);
-                    $('select#eventIDField').append(option);
+                    for(var i=0;i<eventObject.length;i++) {
+                        var option = $('<option value="'+ eventObject[i].id +'"></option>').text(eventObject[i].name + ' in ' + eventObject[i].city);
+                        $('select#eventIDField').append(option);
+                    }
+                } else {
+                    console.log('No events found!');
                 }
             },
             statusCode: {
@@ -808,6 +839,8 @@ function updateTimestamp() {
 function validateForm() {
 
     var bluEmail = $('#bluForm-email').val(),
+        deviceID = localStorage['deviceID'],
+        eventID = localStorage['eventID'],
         valid = true;
 
     if (!isValidEmailAddress(bluEmail)) {
@@ -822,6 +855,14 @@ function validateForm() {
             valid = false;
         }
     });
+
+    if (!deviceID) {
+        valid = false;
+        alert('Please set a Device ID');
+    } else if (!eventID) {
+        valid = false;
+        alert('Please set a Event ID');
+    }
 
     console.log(valid);
     return valid;
