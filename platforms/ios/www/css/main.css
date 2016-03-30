@@ -3,6 +3,10 @@
   width: auto;
 }
 
+h4 {
+  margin-bottom: 5px;
+}
+
 h5 {
   vertical-align: text-bottom;
   color: red;
@@ -61,7 +65,7 @@ h1#main-header {
 
 /* Initial Section Hiding */
 
-section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, section#vapeC, section#smoke, div#pastBrands, section#final {
+section#hiddenMenu, div#email-address, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, section#vapeC, section#smoke, div#pastBrands, section#final {
   display: none;
 }
 
@@ -119,6 +123,10 @@ section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, 
 
 #closeButton {
   padding: 10px;
+}
+
+#startSurvey {
+  margin-top: 20px;
 }
 
 #bluSurvey > div {

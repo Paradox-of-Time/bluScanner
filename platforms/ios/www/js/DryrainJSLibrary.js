@@ -16,7 +16,7 @@ function DT_ApplicationWillResignActive()
     DT_DecoderHardwarePowerRequest(false);
              
     //Disable the MSR hardware
-    //DT_MSRHardwarePowerRequest(false);
+    DT_MSRHardwarePowerRequest(false);
 }
          
          
@@ -101,10 +101,10 @@ function programSled(HWmanufacturer)
             DT_DecoderRawCommandRequest('P(4C)1', 'code4405');          //Enable GS1 DataBar Symbology
             DT_DecoderRawCommandRequest('P(4F)1', 'code4405');          //Enable MSI Plessey Symbology
             DT_DecoderRawCommandRequest('P(50)1', 'code4405');          //Enable Aztec Symbology
-            DT_DecoderRawCommandRequest('P(6A)1', 'code4405');          //Enable UPC
-            DT_DecoderRawCommandRequest('P(6B)1', 'code4405');          //Enable Code 39 Symbology
-            DT_DecoderRawCommandRequest('P(6C)1', 'code4405');          //Enable Code 93 Symbology
-            DT_DecoderRawCommandRequest('P(6D)1', 'code4405');          //Enable Code 128 Symbology
+            // DT_DecoderRawCommandRequest('P(6A)1', 'code4405');          //Enable UPC
+            // DT_DecoderRawCommandRequest('P(6B)1', 'code4405');          //Enable Code 39 Symbology
+            // DT_DecoderRawCommandRequest('P(6C)1', 'code4405');          //Enable Code 93 Symbology
+            // DT_DecoderRawCommandRequest('P(6D)1', 'code4405');          //Enable Code 128 Symbology
             DT_DecoderRawCommandRequest('P(6E)1', 'code4405');          //Enable Interleave 2 Of 5 Symbology
             DT_DecoderRawCommandRequest('P(6F)1', 'code4405');          //Enable Codabar Symbology
             DT_DecoderRawCommandRequest('P(F7)1', 'code4405');          //Enable Code 11 Symbology
@@ -175,7 +175,7 @@ function DT_RuntimeInformationResponse(appVersion,
         DT_DecoderHardwarePowerRequest(true);
                                                         
         //Power up the MSR Hardware
-        //DT_MSRHardwarePowerRequest(true);
+        DT_MSRHardwarePowerRequest(true);
                 
         //************** Sled Battery Check Stuff ************************************************************************************
         //Place initial battery status calls immediately, then again after 10 seconds, and then start the battery check interval timer

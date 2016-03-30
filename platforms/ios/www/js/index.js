@@ -99,15 +99,27 @@ jQuery(function($) {
         }
     });
 
+    // Listen for opt in changes...
+    $('input[name="opt_in"]').change(function(e) {
+        optIn = $('input[name="opt_in"]:checked', '#bluForm').val();
+
+        if (optIn == 'true') {
+            $('#email-address').fadeIn();
+        } else if (optIn == 'false') {
+            $('#email-address').fadeOut();
+            $('input[name="email"]').val('');
+        }
+    })
+
     // Listen for 'Tried Blu?' response changes...
     $('input[name="tried_blu"]').change(function(e) {
-        triedBlu = $('input[name=tried_blu]:checked', '#bluForm').val();
+        triedBlu = $('input[name="tried_blu"]:checked', '#bluForm').val();
 
         if (triedBlu == 'No') {
             $('#whyNotBlu').fadeIn();
         } else if (triedBlu == 'Yes') {
             $('#whyNotBlu').fadeOut();
-            $('textarea[name=blu_no_reason]').val('');
+            $('textarea[name="blu_no_reason"]').val('');
         }
     });
 
@@ -464,79 +476,82 @@ $('#submit').click(function (event) {
     formData = [$('#bluForm').serializeJSON()];
 
     // formData = [{
-    //     "events_id": 481028,
-    //     "first_name": "James",
-    //     "last_name": "Bond",
-    //     "address": "1600 Amphitheater Parkway",
-    //     "address_2": "",
-    //     "city": "Mountain View",
-    //     "state": "CA",
-    //     "zip": "94043",
-    //     "gender": "male",
-    //     "dob": "1980-02-22",
-    //     "phone": "773-555-1212",
-    //     "email": "user@email.com",
-    //     "device_id": "ABCD",
-    //     "timestamp": "2014-02-12 17:03:21",
-    //     "opt_in": "false",
-    //     "coupon_code": "A64",
-    //     "communication_opt_in": "true",
-    //     "sampling_flavor": "Express Kit",
-    //     "current_product_use": "Both",
-    //     "tried_ecig": "Yes",
-    //     "ecig_brands_tried": [
-    //         "BLU",
-    //         "Mark10"
-    //     ],
-    //     "vape_use_duration": "6MO - 1YR",
-    //     "mod_or_ecig": "MOD",
-    //     "why_mod": "MORE POWERFUL",
-    //     "current_ecig_brand": "VUSE",
-    //     "tried_blu": "No",
-    //     "blu_no_reason": "Free form response",
-    //     "blu_nation_opt_in": "Yes",
-    //     "liked_sample": "No",
-    //     "liked_no_reason": "It tasted bad"
+        // "events_id": 481028,
+        // "first_name": "James",
+        // "last_name": "Bond",
+        // "address": "1600 Amphitheater Parkway",
+        // "address_2": "",
+        // "city": "Mountain View",
+        // "state": "CA",
+        // "zip": "94043",
+        // "gender": "male",
+        // "dob": "1980-02-22",
+        // "phone": "773-555-1212",
+        // "email": "user@email.com",
+        // "device_id": "ABCD",
+        // "timestamp": "2014-02-12 17:03:21",
+        // "opt_in": "false",
+        // "coupon_code": "A64",
+        // "communication_opt_in": "true",
+        // "sampling_flavor": "Express Kit",
+        // "current_product_use": "Both",
+        // "tried_ecig": "Yes",
+        // "ecig_brands_tried": [
+        //     "BLU",
+        //     "Mark10"
+        // ],
+        // "vape_use_duration": "6MO - 1YR",
+        // "mod_or_ecig": "MOD",
+        // "why_mod": "MORE POWERFUL",
+        // "current_ecig_brand": "VUSE",
+        // "tried_blu": "No",
+        // "blu_no_reason": "Free form response",
+        // "blu_nation_opt_in": "Yes",
+        // "liked_sample": "No",
+        // "liked_no_reason": "It tasted bad"
     // }];
 
-    $.ajax({
-        type: "POST",
-        url: "http://blu.momentum.networkninja.com/api/v1/save",
-        dataType: "json",
-        data: {data : JSON.stringify(formData)},
-        success: function(result) {
+    if(!($('#bluForm-sample :selected').val() == '')) {
+        $.ajax({
+            type: "POST",
+            url: "http://blu.momentum.networkninja.com/api/v1/save",
+            dataType: "json",
+            data: {data : JSON.stringify(formData)},
+            success: function(result) {
 
-            alert('Data has been successfully submitted!');
+                alert('Data has been successfully submitted!');
 
-            setTimeout(function(){
-                 window.location.reload();
-            }, 2000);
-        },
-        statusCode: {
-            200: function (response) {
-                console.log('Success!')
+                setTimeout(function(){
+                     window.location.reload();
+                }, 2000);
             },
-            400: function (response) {
-                console.log('Bad Request')
+            statusCode: {
+                200: function (response) {
+                    console.log('Success!')
+                },
+                400: function (response) {
+                    console.log('Bad Request')
+                },
+                400: function (response) {
+                    console.log('Bad Request')
+                },
+                404: function (response) {
+                    console.log('Unknown Method')
+                },
+                500: function (response) {
+                    console.log(response.responseText);
+                },
+                503: function (response) {
+                    console.log('Service unavailable')
+                }
             },
-            400: function (response) {
-                console.log('Bad Request')
-            },
-            404: function (response) {
-                console.log('Unknown Method')
-            },
-            500: function (response) {
-                console.log(response.responseText);
-                alert('Invalid Device ID!');
-            },
-            503: function (response) {
-                console.log('Service unavailable')
+            error: function (e) {
+                alert('Something went wrong when submitting.');
             }
-        },
-        error: function (e) {
-            alert('Something went wrong when submitting.');
-        }
-    });
+        });
+    } else {
+        alert('Please select a sample!');
+    }
 
     // for (var i = 0; i < (data.length); i++) {
     //     console.log(data[i]);
@@ -698,6 +713,9 @@ function getEvents() {
                     console.log(eventObject[0].id);
 
                     for(var i=0;i<eventObject.length;i++) {
+                        // var eventM = eventObject[i].start_timestamp.substr(5, 2);
+                        // var eventD = eventObject[i].start_timestamp.substr(8, 2);
+                        // var option = $('<option value="'+ eventObject[i].id +'"></option>').text(eventObject[i].name + ' ' + eventM + '/' + eventD + ' in ' + eventObject[i].city);
                         var option = $('<option value="'+ eventObject[i].id +'"></option>').text(eventObject[i].name + ' in ' + eventObject[i].city);
                         $('select#eventIDField').append(option);
                     }
@@ -720,7 +738,6 @@ function getEvents() {
                 },
                 500: function (response) {
                     console.log(response.responseText);
-                    alert('Invalid Device ID!');
                 },
                 503: function (response) {
                     console.log('Service unavailable')
@@ -843,10 +860,12 @@ function validateForm() {
         eventID = localStorage['eventID'],
         valid = true;
 
-    if (!isValidEmailAddress(bluEmail)) {
-        console.log('email not valid');
-        valid = false;
-        $('#bluForm-email').toggleClass('warn');
+    if (bluEmail || ($('input[name="opt_in"]:checked').val() == 'true')) {
+        if (!isValidEmailAddress(bluEmail)) {
+            console.log('email not valid');
+            valid = false;
+            $('#bluForm-email').toggleClass('warn');
+        }
     }
 
     $('#bluForm').find('input.required').filter(function() {
@@ -855,6 +874,26 @@ function validateForm() {
             valid = false;
         }
     });
+
+    if (!$('input[name="opt_in"]:checked').val()) {
+        valid = false;
+    }
+
+    // Make sure the date actually exists
+    if ($('#bluForm-dob').val()) {
+        var str = $('#bluForm-dob').val(),
+            y = str.substr(0,4),
+            m = str.substr(5,2),
+            d = str.substr(8,2);
+
+        if ((m > '12') || (d > '31')) {
+            $('#bluForm-dob').toggleClass('warn');
+            valid = false;
+        }
+
+    } else {
+        valid = false;
+    }
 
     if (!deviceID) {
         valid = false;
