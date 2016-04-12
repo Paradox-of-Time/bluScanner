@@ -17,7 +17,7 @@
     specific language governing permissions and limitations
     under the License.
 -->
-<html>
+<html manifest="manifest.appcache">
     <head>
         <meta charset="utf-8" />
         <meta name="format-detection" content="telephone=no" />
@@ -215,8 +215,8 @@
 
                       <div>
                         <h4>Do you want to opt-in to blu Nation?</h4>
-                        <input type="radio" name="opt_in" id="optin-y" value="true"><label class="optin required" for="optin-y">Yes</label>
-                        <input type="radio" name="opt_in" id="optin-n" value="false" checked="checked"><label class="optin required" for="optin-n">No</label>
+                        <input type="radio" name="opt_in" id="optin-y" value="true" checked="checked"><label class="optin required" for="optin-y">Yes</label>
+                        <input type="radio" name="opt_in" id="optin-n" value="false"><label class="optin required" for="optin-n">No</label>
                       </div>
 
                       <div class="clear"></div>
@@ -233,7 +233,7 @@
                       <input type="hidden" name="device_id" id="device_id">
                       <input type="hidden" name="events_id" id="events_id">
                       <input type="hidden" name="timestamp" id="timestamp">
-                      <input type="hidden" name="coupon_code" id="couponCode" />
+                      <!-- <input type="hidden" name="coupon_code" id="couponCode" /> -->
                       <input type="hidden" name="communication_opt_in" id="optin2">
                     </div>
 
@@ -267,6 +267,7 @@
                         <div>
                           <h4>What's your current usual brand?</h4>
                           <select placeholder="Current Brand" id="usualBrand" name="current_ecig_brand" class="sm-form-control">
+                            <option value="" disabled selected>Current Brand</option>
                             <option name="current_ecig_brand" id="currentBrand-blu" value="blu">blu</option>
                             <option name="current_ecig_brand" id="currentBrand-vuse" value="VUSE">VUSE</option>
                             <option name="current_ecig_brand" id="currentBrand-markten" value="MarkTen">MarkTen</option>
@@ -342,13 +343,20 @@
                       </section>
                       
                       <section id="final">
+                        <h4>Please select your kit:</h4>
+                        <div class="col_one_third">
+                        <!-- <label for="bluForm-state">State</label> -->
+                          <select placeholder="Sample" id="bluForm-sample" name="sampling_kit" class="sm-form-control">
+                            <option value="" disabled selected>Kit</option>
+                            <option value="Xpress Kit">Xpress Kit</option>
+                          </select>
+                        </div>
+
                         <h4>Please select your sample:</h4>
                         <div class="col_one_third">
                         <!-- <label for="bluForm-state">State</label> -->
                           <select placeholder="Sample" id="bluForm-sample" name="sampling_flavor" class="sm-form-control">
                             <option value="" disabled selected>Sample</option>
-                            <option value="Xpress Kit">Xpress Kit</option>
-                            <option value="PLUS">PLUS</option>
                             <option value="Tank | Classic Tobacco">Tank | Classic Tobacco</option>
                             <option value="Tank | Magnificent Menthol">Tank | Magnificent Menthol</option>
                             <option value="Tank | Cherry Crush">Tank | Cherry Crush</option>
@@ -375,9 +383,9 @@
 
                         <div class="clear"></div>
 
-                        <!-- <div class="col_one_fourth">
+                        <div class="col_one_fourth">
                           <input placeholder="Coupon Code" type="text" id="couponCode" name="coupon_code" value="" class="sm-form-control" />
-                        </div> -->
+                        </div>
 
                           <div class="clear"></div>
                           <a href="#" id="submit" class="button button-3d fcenter">Submit</a>

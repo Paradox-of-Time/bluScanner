@@ -18,28 +18,88 @@
  */
 
 // implement your decoding as you need it, this just does ASCII decoding
-function hex2a(hex) {
-    var str = '';
-    for (var i = 0; i < hex.length; i += 2) {
-        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-    }
-    return str;
-}
+// function hex2a(hex) {
+//     var str = '';
+//     for (var i = 0; i < hex.length; i += 2) {
+//         str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+//     }
+//     return str;
+// }
 
 var formData,
     scanData,
-    data = [],
+    storedData = [],
+    submissionBacklog = [],
     currentSurveySection,
     submitFired,
     backlogFired,
     triedblu,
     triedEcig,
-    clickTimer = null;
+    clickTimer = null,
+    appCache = window.applicationCache;
+
+function handleCacheEvent(e) {
+  switch (appCache.status) {
+    case appCache.UNCACHED: // UNCACHED == 0
+        console.log('uncached')
+      return 'UNCACHED';
+      break;
+    case appCache.IDLE: // IDLE == 1
+      return 'IDLE';
+      break;
+    case appCache.CHECKING: // CHECKING == 2
+      return 'CHECKING';
+      break;
+    case appCache.DOWNLOADING: // DOWNLOADING == 3
+      return 'DOWNLOADING';
+      break;
+    case appCache.UPDATEREADY:  // UPDATEREADY == 4
+      return 'UPDATEREADY';
+      break;
+    case appCache.OBSOLETE: // OBSOLETE == 5
+      return 'OBSOLETE';
+      break;
+    default:
+      return 'UKNOWN CACHE STATUS';
+      break;
+  };
+}
+
+function handleCacheError(e) {
+  console.log('OFFLINE: Cache failed to update.')
+};
+
+// Fired after the first cache of the manifest.
+appCache.addEventListener('cached', handleCacheEvent, false);
+
+// Checking for an update. Always the first event fired in the sequence.
+appCache.addEventListener('checking', handleCacheEvent, false);
+
+// An update was found. The browser is fetching resources.
+appCache.addEventListener('downloading', handleCacheEvent, false);
+
+// The manifest returns 404 or 410, the download failed,
+// or the manifest changed while the download was in progress.
+appCache.addEventListener('error', handleCacheError, false);
+
+// Fired after the first download of the manifest.
+appCache.addEventListener('noupdate', handleCacheEvent, false);
+
+// Fired if the manifest file returns a 404 or 410.
+// This results in the application cache being deleted.
+appCache.addEventListener('obsolete', handleCacheEvent, false);
+
+// Fired for each resource listed in the manifest as it is being fetched.
+appCache.addEventListener('progress', handleCacheEvent, false);
+
+// Fired when the manifest resources have been newly redownloaded.
+appCache.addEventListener('updateready', handleCacheEvent, false);
 
 $('document').ready(function() {
     updateDeviceID();
     updateEventID();
     getEvents();
+    // Masking for form fields
     $('#bluForm-dob').mask('0000-00-00');
     $('#bluForm-zip').mask('00000');
     $('#bluForm-phone').mask('000-000-0000');
@@ -47,6 +107,7 @@ $('document').ready(function() {
     $('.phone').mask('0000-0000');
     $('.phone_with_ddd').mask('(00) 0000-0000');
     $('.phone_us').mask('(000) 000-0000');
+
 });
 
 var app = {
@@ -383,45 +444,49 @@ function signupComplete() {
     console.log('signup complete');
 }
 
-function sendBacklog(emails) {
-    // console.log("sending backlog...");
+function sendBacklog() {
+    console.log("sending backlog...");
 
-    data = window.localStorage.getArray('data');
+    storedData = window.localStorage.getArray('storedSubmissions');
 
-    for (var i = 0; i < (data.length); i++) {
-        console.log(data[i]);
-        if (data[i] != formData) {
+    for (var i = 0; i < (storedData.length); i++) {
+        console.log(storedData[i]);
+        if (storedData[i] != formData) {
             // if data isn't a duplicate
             $.ajax({
                 type: "POST",
-                url: "https://mandrillapp.com/api/1.0/messages/send-template.json",
-                data: {
-                    "key": "vV0UyEfydJwLYC8XoC1NwA",
-                        "template_name": "ritz-welcome-email-1", //ritz-welcome-email-1 for team 2 | ritz-test for testing
-                        "template_content": [
-                        {
-                           "name": "example name",
-                           "content": "example content"
-                        }
-                    ],
-                    "message": {
-                        "from_email": "snacks@ritzcrackers.com",
-                        "to": [
-                        {
-                            "email": emails[i], //$("#reg-form").serialize(),
-                            "type": "to"
-                         }
-                        ],
-                        "subject": "Get snacking with these Big Ritz Snack Truck Recipes."
-                    }
-                }
+                url: "http://blu.momentum.networkninja.com/api/v1/save",
+                dataType: "json",
+                data: {data : storedData[i]},
+                success: function(result) {
+                    console.log('backlog sent properly');
+                    backlogFired = true;
 
-            }).done(function(response) {
-                console.log("Backlog sent");
-                backlogFired = true;
-            }).fail(function(response) {
-                console.log("Backlog wasn't sent");
-                backlogFired = false;
+                },
+                statusCode: {
+                    200: function (response) {
+                        console.log('Success!')
+                    },
+                    400: function (response) {
+                        console.log('Bad Request')
+                    },
+                    400: function (response) {
+                        console.log('Bad Request')
+                    },
+                    404: function (response) {
+                        console.log('Unknown Method')
+                    },
+                    500: function (response) {
+                        console.log(response.responseText);
+                    },
+                    503: function (response) {
+                        console.log('Service unavailable')
+                    }
+                },
+                error: function (e) {
+                    console.log("Backlog wasn't sent");
+                    backlogFired = false;
+                }
             });
         }
     }
@@ -429,8 +494,8 @@ function sendBacklog(emails) {
     console.log("backlogFired = " + backlogFired);
 
     if (backlogFired != false) {
+        window.localStorage.deleteArray('storedSubmissions');
         console.log("emails array deleted");
-        window.localStorage.deleteArray('emails');
     }
 }
 
@@ -455,9 +520,12 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
     // Alert the user with a naitive iOS alert box of the scan data
     // DT_AlertBoxRequest(12345, 'Scan Data', 'first name: ' + dlParsedObject.firstName, ['OK']);
 
-
-    // fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, symbologyType, dlParsedObject) 
-    fillFormFields(decoderData, rawDecoderData, null, null, symbologyType, dlParsedObject);
+    // Check if we're in the survey section
+    if (currentSurveySection) {
+        scanCoupon(decoderData);
+    } else {
+        fillFormFields(decoderData, rawDecoderData, null, null, symbologyType, dlParsedObject);
+    }
 }
 
 function DT_MSRDataResponse(msrData, msrDecoderData, dlParsedObject) {
@@ -473,57 +541,25 @@ $('#submit').click(function (event) {
     event.preventDefault();
     updateTimestamp();
     updateEventID();
-    formData = [$('#bluForm').serializeJSON()];
-
-    // formData = [{
-        // "events_id": 481028,
-        // "first_name": "James",
-        // "last_name": "Bond",
-        // "address": "1600 Amphitheater Parkway",
-        // "address_2": "",
-        // "city": "Mountain View",
-        // "state": "CA",
-        // "zip": "94043",
-        // "gender": "male",
-        // "dob": "1980-02-22",
-        // "phone": "773-555-1212",
-        // "email": "user@email.com",
-        // "device_id": "ABCD",
-        // "timestamp": "2014-02-12 17:03:21",
-        // "opt_in": "false",
-        // "coupon_code": "A64",
-        // "communication_opt_in": "true",
-        // "sampling_flavor": "Express Kit",
-        // "current_product_use": "Both",
-        // "tried_ecig": "Yes",
-        // "ecig_brands_tried": [
-        //     "BLU",
-        //     "Mark10"
-        // ],
-        // "vape_use_duration": "6MO - 1YR",
-        // "mod_or_ecig": "MOD",
-        // "why_mod": "MORE POWERFUL",
-        // "current_ecig_brand": "VUSE",
-        // "tried_blu": "No",
-        // "blu_no_reason": "Free form response",
-        // "blu_nation_opt_in": "Yes",
-        // "liked_sample": "No",
-        // "liked_no_reason": "It tasted bad"
-    // }];
+    formData = JSON.stringify([$('#bluForm').serializeJSON()]);
 
     if(!($('#bluForm-sample :selected').val() == '')) {
         $.ajax({
             type: "POST",
             url: "http://blu.momentum.networkninja.com/api/v1/save",
             dataType: "json",
-            data: {data : JSON.stringify(formData)},
+            data: {data : formData},
             success: function(result) {
+                submissionBacklog = window.localStorage.getArray('storedSubmissions');
+                console.log(submissionBacklog);
+                arrayLength = submissionBacklog.length;
+                console.log(arrayLength);
+                if (arrayLength > 0 ) {
+                    console.log('backlog found: ' + arrayLength + ' entries')
+                  sendBacklog();
+                }
 
                 alert('Data has been successfully submitted!');
-
-                setTimeout(function(){
-                     window.location.reload();
-                }, 2000);
             },
             statusCode: {
                 200: function (response) {
@@ -546,9 +582,15 @@ $('#submit').click(function (event) {
                 }
             },
             error: function (e) {
-                alert('Something went wrong when submitting.');
+                alert('No network detected. Data has been cached.');
+                window.localStorage.pushArrayItem('storedSubmissions', formData);
             }
         });
+
+        setTimeout(function() {
+             window.location.reload();
+        }, 2000);
+        
     } else {
         alert('Please select a sample!');
     }
@@ -670,6 +712,10 @@ function fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, sy
     } else {
         console.log('Gender is undefined')
     }
+}
+
+function scanCoupon(decoderData) {
+    $('#couponCode').val(decoderData);
 }
 
 function updateDeviceID() {
@@ -806,7 +852,8 @@ function goNext(currentPage) {
                 }, 800);
             } else {
                 console.log(usualBrand);
-                console.log('please choose a brand!')
+                console.log('please choose a brand!');
+                $('#usualBrand').addClass('warn');
             }
             break;
 

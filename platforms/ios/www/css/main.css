@@ -65,7 +65,7 @@ h1#main-header {
 
 /* Initial Section Hiding */
 
-section#hiddenMenu, div#email-address, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, section#vapeC, section#smoke, div#pastBrands, section#final {
+section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, section#vapeC, section#smoke, div#pastBrands, section#final {
   display: none;
 }
 
