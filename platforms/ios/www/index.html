@@ -27,10 +27,7 @@
         <link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
         <link rel="stylesheet" href="css/style.css" type="text/css" />
-        <!-- <link rel="stylesheet" href="css/dark.css" type="text/css" /> -->
-        <!-- <link rel="stylesheet" href="css/font-icons.css" type="text/css" /> -->
-        <link rel="stylesheet" href="css/animate.css" type="text/css" />
-        <!-- <link rel="stylesheet" href="css/magnific-popup.css" type="text/css" /> -->
+        <!-- <link rel="stylesheet" href="css/animate.css" type="text/css" /> -->
         <link rel="stylesheet" href="css/responsive.css" type="text/css" />
         <link rel="stylesheet" href="css/main.css" type="text/css" />
 
@@ -39,6 +36,7 @@
         <script type="text/javascript" src="js/jquery.tap.js"></script>
         <script type="text/javascript" src="js/plugins.js"></script>
         <script type="text/javascript" src="js/jquery.serializejson.min.js"></script>
+        <script type="text/javascript" src="js/moment.min.js"></script>
 
         <!--[if lt IE 9]>
             <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
@@ -77,8 +75,8 @@
                   <h3>About You</h3>
                 </div>
                 <div class="col-xs-7">
-                  <h5 id="deviceIDError">No Device ID Entered!</h5>
-                  <h5 id="eventIDError">No Event ID Selected!</h5>
+                  <h5 id="deviceIDMsg"></h5>
+                  <h5 id="eventIDMsg">No Event ID Selected!</h5>
                 </div>
               </div>
 
@@ -90,7 +88,7 @@
                   <div class="clear"></div>
                   <!-- TESTING ONLY <a href="#" id="submit" class="button button-3d fcenter">Submit</a> -->
 
-                  <form id="bluForm" name="bluForm" class="nobottommargin" action="#" method="post">
+                  <form id="bluForm" name="bluForm" class="nobottommargin" action="#" novalidate method="post">
                     <section id="dlInfo">
                       <div class="col_half">
                         <!-- <label for="bluForm-name">First Name:</label> -->
@@ -106,15 +104,19 @@
 
                       <div class="col_half">
                         <label for="bluForm-dob">DOB:&nbsp;</label>
-                        <input type="text" id="bluForm-dob" name="dob" value="" placeholder="YYYY-MM-DD" class="bluForm-dob sm-form-control required" />
+                        <input type="text" pattern="[0-9]*" id="bluForm-dob" name="dob" value="" placeholder="MM-DD-YYYY" maxlength="10" class="bluForm-dob sm-form-control required autotab" />
                       </div>
 
-                      <div class="col_half col_last">
+                      <div class="clear"></div>
+
+                      <div>
                         <!-- <label for="bluForm-sex">Gender:</label> -->
-                        <div class="bluForm-sex">
-                          <input type="radio" name="gender" id="bluForm-sex-f" class="bluForm-sex required" value="Female"><label for="bluForm-sex-f">Female</label>
-                          <input type="radio" name="gender" id="bluForm-sex-m" class="bluForm-sex required" value="Male"><label for="bluForm-sex-m">Male</label>
-                          <input type="radio" name="gender" id="bluForm-sex-n" class="bluForm-sex required" value="NA"><label for="bluForm-sex-n">N/A</label>
+                        <div class="bluForm-sex multi">
+                          <ul>
+                            <li><input type="radio" name="gender" id="bluForm-sex-f" class="bluForm-sex required" value="Female"><label for="bluForm-sex-f">Female</label><div class="check"></div></li>
+                            <li><input type="radio" name="gender" id="bluForm-sex-m" class="bluForm-sex required" value="Male"><label for="bluForm-sex-m">Male</label><div class="check"></div></li>
+                            <li class="last-item"><input type="radio" name="gender" id="bluForm-sex-n" class="bluForm-sex required" value="NA"><label for="bluForm-sex-n">N/A</label><div class="check"></div></li>
+                          </ul>
                         </div>
                       </div>
 
@@ -202,21 +204,25 @@
 
                       <div class="col_half col_last">
                         <!-- <label for="bluForm-zip">Zip</label> -->
-                        <input placeholder="Postal Code" type="text" id="bluForm-zip" name="zip" value="" maxlength="5" class="sm-form-control required" />
+                        <input placeholder="Postal Code" pattern="[0-9]*" type="text" id="bluForm-zip" name="zip" value="" maxlength="5" class="sm-form-control required autotab" />
                       </div>
 
                       <div class="clear"></div>
 
                       <div class="col_half col_last">
-                        <input placeholder="Phone" type="tel" id="bluForm-phone" name="phone" value="" class="sm-form-control" />
+                        <input placeholder="Phone" pattern="[0-9]*" type="tel" id="bluForm-phone" name="phone" value="" class="sm-form-control" />
                       </div>
 
                       <div class="clear"></div>
 
                       <div>
                         <h4>Do you want to opt-in to blu Nation?</h4>
-                        <input type="radio" name="opt_in" id="optin-y" value="true" checked="checked"><label class="optin required" for="optin-y">Yes</label>
-                        <input type="radio" name="opt_in" id="optin-n" value="false"><label class="optin required" for="optin-n">No</label>
+                        <div class="multi">
+                          <ul>
+                            <li><input type="radio" name="opt_in" id="optin-y" value="true" checked="checked"><label class="optin required" for="optin-y">Yes</label><div class="check"></div></li>
+                            <li class="last-item"><input type="radio" name="opt_in" id="optin-n" value="false"><label class="optin required" for="optin-n">No</label><div class="check"></div></li>
+                          </ul>
+                        </div>
                       </div>
 
                       <div class="clear"></div>
@@ -246,39 +252,48 @@
                       <section id="start">
                         <div>
                           <h4>What do you currently do?</h4>
-                          <input type="radio" name="current_product_use" id="currentUse-e" value="Vape"><label class="currentUse" for="currentUse-e">Vape</label>
-                          <br><input type="radio" name="current_product_use" id="currentUse-c" value="Smoke"><label class="currentUse" for="currentUse-c">Smoke</label>
-                          <br><input type="radio" name="current_product_use" id="currentUse-b" value="Both"><label class="currentUse" for="currentUse-b">Both</label>
-                          <br><input type="radio" name="current_product_use" id="currentUse-n" value="Neither"><label class="currentUse" for="currentUse-n">Neither</label>
+                          <div class="multi">
+                            <ul>
+                              <li><input type="radio" name="current_product_use" id="currentUse-e" value="Vape"><label class="currentUse" for="currentUse-e">Vape</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_product_use" id="currentUse-c" value="Smoke"><label class="currentUse" for="currentUse-c">Smoke</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_product_use" id="currentUse-b" value="Both"><label class="currentUse" for="currentUse-b">Both</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_product_use" id="currentUse-n" value="Neither"><label class="currentUse" for="currentUse-n">Neither</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
                         <div class="clear"></div>
-                        <a href="#" id="next1" class="button button-small button-3d fcenter">Next &gt;</a>
+                        <a href="#" id="prev1" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="next1" class="button button-small button-3d fcenter">Next &gt;</a>
                       </section>
 
                       <section id="vapeA">
                         <div id="useLength">
                           <h4>How long have you been vaping?</h4>
-                          <input type="radio" name="vape_use_duration" id="useLength-0" value="6 months or less"><label class="useLength" for="useLength-0">6 Months or Less</label>
-                          <br><input type="radio" name="vape_use_duration" id="useLength-6m" value="6 months – 1 year"><label class="useLength" for="useLength-6m">6 Months &#8211; 1 Year</label>
-                          <br><input type="radio" name="vape_use_duration" id="useLength-1y" value="1 – 2 years"><label class="useLength" for="useLength-1y">1 &#8211; 2 Years</label>
-                          <br><input type="radio" name="vape_use_duration" id="useLength-2y" value="More than 2 years"><label class="useLength" for="useLength-2y">More Than 2 Years</label>
+                          <div class="multi">
+                            <ul>
+                              <li><input type="radio" name="vape_use_duration" id="useLength-0" value="Less than 6 months"><label class="useLength" for="useLength-0">Less Than 6 Months</label><div class="check"></div></li>
+                              <li><input type="radio" name="vape_use_duration" id="useLength-6m" value="6 months – 11 months"><label class="useLength" for="useLength-6m">6 Months &#8211; 11 Months</label><div class="check"></div></li>
+                              <li><input type="radio" name="vape_use_duration" id="useLength-1y" value="1 – 2 years"><label class="useLength" for="useLength-1y">1 &#8211; 2 Years</label><div class="check"></div></li>
+                              <li><input type="radio" name="vape_use_duration" id="useLength-2y" value="More than 2 years"><label class="useLength" for="useLength-2y">More Than 2 Years</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
 
-                        <div>
+                        <div id="currentBrand">
                           <h4>What's your current usual brand?</h4>
-                          <select placeholder="Current Brand" id="usualBrand" name="current_ecig_brand" class="sm-form-control">
-                            <option value="" disabled selected>Current Brand</option>
-                            <option name="current_ecig_brand" id="currentBrand-blu" value="blu">blu</option>
-                            <option name="current_ecig_brand" id="currentBrand-vuse" value="VUSE">VUSE</option>
-                            <option name="current_ecig_brand" id="currentBrand-markten" value="MarkTen">MarkTen</option>
-                            <option name="current_ecig_brand" id="currentBrand-njoy" value="NJOY">NJOY</option>
-                            <option name="current_ecig_brand" id="currentBrand-logic" value="Logic">Logic</option>
-                            <option name="current_ecig_brand" id="currentBrand-refillable" value="Refillable">Refillable</option>
-                            <option name="current_ecig_brand" id="currentBrand-other" value="Other">Other</option>
-                          </select>
+                          <div id="usualBrand" class="multi">
+                            <ul>
+                              <li><input type="radio" name="current_ecig_brand" id="currentBrand-blu" value="blu"><label for="currentBrand-blu">blu</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_ecig_brand" id="currentBrand-vuse" value="VUSE"><label for="currentBrand-vuse">VUSE</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_ecig_brand" id="currentBrand-markten" value="MarkTen"><label for="currentBrand-markten">MarkTen</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_ecig_brand" id="currentBrand-njoy" value="NJOY"><label for="currentBrand-njoy">NJOY</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_ecig_brand" id="currentBrand-logic" value="Logic"><label for="currentBrand-logic">Logic</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_ecig_brand" id="currentBrand-refillable" value="Refillable"><label for="currentBrand-refillable">Refillable/Mod Device</label><div class="check"></div></li>
+                              <li><input type="radio" name="current_ecig_brand" id="currentBrand-other" value="Other"><label for="currentBrand-other">Other</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
                         <div class="clear"></div>
-                        <a href="#" id="nextVapeA" class="button button-small button-3d fcenter">Next &gt;</a>
+                        <a href="#" id="prevVapeA" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextVapeA" class="button button-small button-3d fcenter">Next &gt;</a>
                       </section>
 
                       <!-- <div id="deviceType">
@@ -290,78 +305,103 @@
                       <section id="vapeB">
                         <div>
                           <h4>Have you tried blu before?</h4>
-                          <input type="radio" name="tried_blu" id="triedBlu-y" value="Yes"><label class="triedBlu" for="triedBlu-y">Yes</label>
-                          <br><input type="radio" name="tried_blu" id="triedBlu-n" value="No"><label class="triedBlu" for="triedBlu-n">No</label>
+                          <div class="multi">
+                            <ul>
+                              <li><input type="radio" name="tried_blu" id="triedBlu-y" value="Yes"><label class="triedBlu" for="triedBlu-y">Yes</label><div class="check"></div></li>
+                              <li><input type="radio" name="tried_blu" id="triedBlu-n" value="No"><label class="triedBlu" for="triedBlu-n">No</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
                         
                         <!-- Not initially visible -->
                         <div id="whyNotBlu">
                           <h4>Why haven't you tried blu?</h4>
-                          <textarea name="blu_no_reason" id="whyNot" cols="25" rows="5"></textarea>
+                          <div class="multi">
+                            <ul>
+                              <li><input type="radio" name="blu_no_reason" id="whyNot-a" value="Never heard of it"><label class="whyNot" for="whyNot-a">Never heard of it</label><div class="check"></div></li>
+                              <li><input type="radio" name="blu_no_reason" id="whyNot-b" value="Too expensive"><label class="whyNot" for="whyNot-b">Too expensive</label><div class="check"></div></li>
+                              <li><input type="radio" name="blu_no_reason" id="whyNot-c" value="Not in stock/usual place doesn't carry"><label class="whyNot" for="whyNot-c">Not in stock</label><div class="check"></div></li>
+                              <li><input type="radio" name="blu_no_reason" id="whyNot-d" value="Air flow/throat hit"><label class="whyNot" for="whyNot-d">Air flow/throat hit</label><div class="check"></div></li>
+                              <li><input type="radio" name="blu_no_reason" id="whyNot-e" value="Bad taste"><label class="whyNot" for="whyNot-e">Bad taste</label><div class="check"></div></li>
+                              <li><input type="radio" name="blu_no_reason" id="whyNot-f" value="None of the above"><label class="whyNot" for="whyNot-f">None of the above</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
                         <div class="clear"></div>
-                        <a href="#" id="nextVapeB" class="button button-small button-3d fcenter">Next &gt;</a>
+                        <a href="#" id="prevVapeB" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextVapeB" class="button button-small button-3d fcenter">Next &gt;</a>
                       </section>
   
                       <section id="vapeC">
                         <div>
                           <h4>What made you choose refillable?</h4>
-                          <input type="radio" name="why_mod" id="modReason-a" value="Battery Life"><label class="modReason" for="modReason-a">Battery Life</label>
-                          <br><input type="radio" name="why_mod" id="modReason-b" value="Flavor Selection"><label class="modReason" for="modReason-b">Flavor Selection</label>
-                          <br><input type="radio" name="why_mod" id="modReason-c" value="Recommended by a friend"><label class="modReason" for="modReason-c">Recommended by a friend</label>
-                          <br><input type="radio" name="why_mod" id="modReason-d" value="Nicotine Levels"><label class="modReason" for="modReason-d">Nicotine Levels</label>
-                          <br><input type="radio" name="why_mod" id="modReason-e" value="More Customization"><label class="modReason" for="modReason-e">More Customization</label>
-                          <br><input type="radio" name="why_mod" id="modReason-f" value="More Satisfying"><label class="modReason" for="modReason-f">More Satisfying</label>
-                          <!-- <br><input type="radio" name="why_mod" id="modReason-g" value="Other"><label class="modReason" for="modReason-g">Other</label> -->
+                          <div class="multi">
+                            <ul>
+                              <li><input type="radio" name="why_mod" id="modReason-a" value="Battery Life"><label class="modReason" for="modReason-a">Battery Life</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-b" value="Flavor Selection"><label class="modReason" for="modReason-b">Flavor Selection</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-c" value="Recommended by a friend"><label class="modReason" for="modReason-c">Recommended by a friend</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-d" value="Nicotine Levels"><label class="modReason" for="modReason-d">Nicotine Levels</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-e" value="More Customization"><label class="modReason" for="modReason-e">More Customization</label><div class="check"><div class="inside"></div></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-f" value="More Satisfying"><label class="modReason" for="modReason-f">More Satisfying</label><div class="check"><div class="inside"></div></li>
+                            </ul>
+                          </div>
 
                           <div class="clear"></div>
-                          <a href="#" id="nextVapeC" class="button button-small button-3d fcenter">Next &gt;</a>
+                          <a href="#" id="prevVapeC" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextVapeC" class="button button-small button-3d fcenter">Next &gt;</a>
                         </div>
                       </section>
 
                       <section id="smoke">
                         <div id="pastUse">
                           <h4>Have you used eCigs in the past?</h4>
-                          <input type="radio" name="tried_ecig" id="pastUse-y" value="Yes"><label class="pastUse" for="pastUse-y">Yes</label>
-                          <br><input type="radio" name="tried_ecig" id="pastUse-n" value="No"><label class="pastUse" for="pastUse-n">No</label>
+                          <div class="multi">
+                            <ul>
+                              <li><input type="radio" name="tried_ecig" id="pastUse-y" value="Yes"><label class="pastUse" for="pastUse-y">Yes</label><div class="check"></div></li>
+                              <li><input type="radio" name="tried_ecig" id="pastUse-n" value="No"><label class="pastUse" for="pastUse-n">No</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
 
                         <!-- Not initially visible -->
                         <div id="pastBrands">
                           <h4>What brands have you tried in the past?</h4>
-                          <input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-blu" value="blu"><label class="pastBrands" for="pastBrands-blu">blu</label>
-                          <br><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-vuse" value="VUSE"><label class="pastBrands" for="pastBrands-vuse">VUSE</label>
-                          <br><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-markten" value="MarkTen"><label class="pastBrands" for="pastBrands-markten">MarkTen</label>
-                          <br><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-njoy" value="NJOY"><label class="pastBrands" for="pastBrands-njoy">NJOY</label>
-                          <br><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-logic" value="Logic"><label class="pastBrands" for="pastBrands-logic">Logic</label>
-                          <br><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-refillable" value="Refillable"><label class="pastBrands" for="pastBrands-refillable">Refillable eCigarette</label>
-                          <br><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-other" value="Other"><label class="pastBrands" for="pastBrands-other">Other</label>
+                          <div class="multi">
+                            <ul>
+                              <li><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-blu" value="blu"><label class="pastBrands" for="pastBrands-blu">blu</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-vuse" value="VUSE"><label class="pastBrands" for="pastBrands-vuse">VUSE</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-markten" value="MarkTen"><label class="pastBrands" for="pastBrands-markten">MarkTen</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-njoy" value="NJOY"><label class="pastBrands" for="pastBrands-njoy">NJOY</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-logic" value="Logic"><label class="pastBrands" for="pastBrands-logic">Logic</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-refillable" value="Refillable"><label class="pastBrands" for="pastBrands-refillable">Refillable/Mod Device</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-other" value="Other"><label class="pastBrands" for="pastBrands-other">Other</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
 
                         <div class="clear"></div>
-                        <a href="#" id="nextSmoke" class="button button-small button-3d fcenter">Next &gt;</a>
+                        <a href="#" id="prevSmoke" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextSmoke" class="button button-small button-3d fcenter">Next &gt;</a>
                       </section>
                       
                       <section id="final">
-                        <h4>Please select your kit:</h4>
-                        <div class="col_one_third">
-                        <!-- <label for="bluForm-state">State</label> -->
-                          <select placeholder="Sample" id="bluForm-sample" name="sampling_kit" class="sm-form-control">
-                            <option value="" disabled selected>Kit</option>
-                            <option value="Xpress Kit">Xpress Kit</option>
-                          </select>
+                        <div id="sampleGiveaway">
+                          <h4>Please select your sample:</h4>
+                          <div class="multi">
+                            <ul>
+                              <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-tobacco" value="Classic Tobacco"><label for="sampling-tobacco">Classic Tobacco</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-menthol" value="Magnificent Menthol"><label for="sampling-menthol">Magnificent Menthol</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-cherry" value="Cherry Crush"><label for="sampling-cherry">Cherry Crush</label><div class="check"></div></li>
+                              <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-vanilla" value="Vivid Vanilla"><label for="sampling-vanilla">Vivid Vanilla</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
 
-                        <h4>Please select your sample:</h4>
-                        <div class="col_one_third">
-                        <!-- <label for="bluForm-state">State</label> -->
-                          <select placeholder="Sample" id="bluForm-sample" name="sampling_flavor" class="sm-form-control">
-                            <option value="" disabled selected>Sample</option>
-                            <option value="Tank | Classic Tobacco">Tank | Classic Tobacco</option>
-                            <option value="Tank | Magnificent Menthol">Tank | Magnificent Menthol</option>
-                            <option value="Tank | Cherry Crush">Tank | Cherry Crush</option>
-                            <option value="Tank | Vivid Vanilla">Tank | Vivid Vanilla</option>
-                          </select>
+                        <div id="kitGiveaway">
+                          <h4>Did you give away an Xpress Kit?</h4>
+                          <div class="multi col_one_fourth">
+                            <ul>
+                              <li><input type="radio" class="mobileCheckbox" name="sampling_kit" id="kit-xpress" value="Xpress Kit"><label for="kit-xpress">Yes</label><div class="check"></div></li>
+                              <li><input type="radio" class="mobileCheckbox" name="sampling_kit" id="kit-none" value="None"><label for="kit-none">No</label><div class="check"></div></li>
+                            </ul>
+                          </div>
                         </div>
 
                         <!-- <div>
@@ -388,7 +428,7 @@
                         </div>
 
                           <div class="clear"></div>
-                          <a href="#" id="submit" class="button button-3d fcenter">Submit</a>
+                          <a href="#" id="prevFinal" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="submit" class="button button-3d fcenter">Submit</a>
                         </div>
                       </section>
                     
@@ -396,6 +436,7 @@
                   </form>
                   <!-- <div id="resultDiv"></div> -->
                 </div>
+              </div>
             </div>
           </div>
 

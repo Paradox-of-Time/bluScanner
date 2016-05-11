@@ -35,6 +35,8 @@ var formData,
     backlogFired,
     triedblu,
     triedEcig,
+    reformattedDOB,
+    age,
     clickTimer = null,
     appCache = window.applicationCache;
 
@@ -100,13 +102,19 @@ $('document').ready(function() {
     updateEventID();
     getEvents();
     // Masking for form fields
-    $('#bluForm-dob').mask('0000-00-00');
+    $('#bluForm-dob').mask('00-00-0000');
     $('#bluForm-zip').mask('00000');
     $('#bluForm-phone').mask('000-000-0000');
     $('.cep').mask('00000-000');
     $('.phone').mask('0000-0000');
     $('.phone_with_ddd').mask('(00) 0000-0000');
     $('.phone_us').mask('(000) 000-0000');
+
+    $('.autotab').keyup(function () {
+        if (this.value.length == this.maxLength) {
+          $(this).next('input').focus();
+        }
+    });
 
 });
 
@@ -197,6 +205,11 @@ jQuery(function($) {
         }
     });
 
+    // Listen for DOB changes...
+    $('input[name="dob"]').blur(function(e) {
+        checkAge();
+    });
+
     // triple click to show hidden menu
     $('#bluLogo').on('tap', function(event) {
         event.preventDefault();
@@ -232,162 +245,15 @@ jQuery(function($) {
     });
 
     $('#setEventID').click(function() {
-        var eventID = $('select[name="eventID"]').val();
+        var eventID = $('select[name="eventID"]').val(),
+            eventName = $('select[name="eventID"]').find(':selected').text();
         if (!eventID) {
             alert('Please select an event!')
         } else {
             localStorage['eventID'] = eventID;
+            localStorage['eventName'] = eventName;
             updateEventID();
         }
-    });
-
-    $('#scanButton').click(function() {
-        console.log('scan button clicked');
-        // Remove previous warning labels, if any
-        $('.warn').removeClass('warn');
-        // Reset form fields
-        $('#bluForm')[0].reset();
-        
-        cordova.plugins.blinkIdScanner.scan(
-        
-            // Register the callback handler
-            function callback(scanningResult) {
-                
-                // handle cancelled scanning
-                if (scanningResult.cancelled == true) {
-                    resultDiv.innerHTML = "Cancelled!";
-                    return;
-                }
-                
-                // Obtain list of recognizer results
-                var resultList = scanningResult.resultList;
-                
-                // Iterate through all results
-                for (var i = 0; i < resultList.length; i++) {
-
-                    // Get individual resilt
-                    var recognizerResult = resultList[i];
-                    // if (recognizerResult.resultType == "Barcode result") {
-                    //     // handle Barcode scanning result
-
-                    //     var raw = "";
-                    //     if (typeof(recognizerResult.raw) != "undefined" && recognizerResult.raw != null) {
-                    //         raw = " (raw: " + hex2a(recognizerResult.raw) + ")";
-                    //     }
-                    //     resultDiv.innerHTML = "Data: " + recognizerResult.data +
-                    //                        raw +
-                    //                        " (Type: " + recognizerResult.type + ")";
-
-                    // }
-                    if (recognizerResult.resultType == 'USDL result') {
-
-                        // Camera Scanner Fields
-                        // var fields = recognizerResult.fields,
-                        //     FNAME = fields[kPPCustomerFirstName],
-                        //     LNAME = fields[kPPCustomerFamilyName],
-                        //     ADDRESS1 = fields[kPPAddressStreet],
-                        //     CITY = fields[kPPAddressCity],
-                        //     STATE = fields[kPPAddressJurisdictionCode],
-                        //     ZIP = fields[kPPAddressPostalCode],
-                        //     DOB = fields[kPPDateOfBirth],
-                        //     SEX = fields[kPPSex];
-
-                        // Hardware Scanner Fields
-                        var FNAME = scanData.firstName,
-                            LNAME = scanData.lastName,
-                            ADDRESS1 = scanData.address1,
-                            ADDRESS2 = scanData.address2,
-                            CITY = scanData.city,
-                            STATE = scanData.jurisdictionCode,
-                            ZIP = scanData.postalCode,
-                            DOB = scanData.birthdate,
-                            SEX = scanData.gender;
-
-                        var fields = recognizerResult.fields;
-                        
-                        if (FNAME) {
-                            $('#bluForm-name').val(FNAME);
-                        } else {
-                            console.log(FNAME + ' is undefined');
-                            $('#bluForm-name').toggleClass('warn');
-                        }
-
-                        if (LNAME) {
-                            $('#bluForm-lname').val(LNAME);
-                        } else {
-                            console.log(LNAME + ' is undefined');
-                            $('#bluForm-lname').toggleClass('warn');
-                        }
-
-                        if (ADDRESS1) {
-                            $('#bluForm-address1').val(ADDRESS1);
-                        } else {
-                            console.log(ADDRESS1 + ' is undefined');
-                            $('#bluForm-address1').toggleClass('warn');
-                        }
-
-                        if (CITY) {
-                            $('#bluForm-city').val(CITY);
-                        } else {
-                            console.log(CITY + ' is undefined');
-                            $('#bluForm-city').toggleClass('warn');
-                        }
-
-                        if (STATE) {
-                            $('#bluForm-state').val(STATE);
-                        } else {
-                            console.log(STATE + ' is undefined');
-                            $('#bluForm-state').toggleClass('warn');
-                        }
-
-                        if (ZIP) {
-                            $('#bluForm-zip').val(ZIP);
-                        } else {
-                            console.log(ZIP + ' is undefined');
-                            $('#bluForm-zip').toggleClass('warn');
-                        }
-
-                        if (DOB) {
-                            str = (DOB);
-                            if (!/^(\d){8}$/.test(str)) {
-                                // invalid date handling
-                            }
-
-                            // $('#bluForm-email').val(fields[kPPDateOfBirth]);
-
-                            var y = str.substr(4,4),
-                                m = str.substr(0,2),
-                                d = str.substr(2,2);
-
-                            $('#bluForm-dob').val(y + '-' + m + '-' + d);
-                        } else {
-                            console.log(DOB + ' is undefined')
-                        }
-
-                        if (SEX) {
-                            sex = (SEX);
-
-                            if (sex == '1') {
-                                $('#bluForm-sex-m').prop("checked", true);    
-                            } else if (sex == '2') {
-                                $('#bluForm-sex-f').prop("checked", true);
-                            } else {
-                                $('#bluForm-sex-n').prop("checked", true);
-                            }
-                        } else {
-                            console.log('Gender is undefined')
-                        }
-                    }                  
-                }
-            },
-            
-            // Register the error callback
-            function errorHandler(err) {
-                alert('Error: ' + err);
-            },
-
-            types, licenseiOs
-        );
     });
 
     $('#clearStorage').click(function () {
@@ -399,9 +265,11 @@ jQuery(function($) {
         if (validateForm()) {
             // $('#opt_in2').val($('#opt_in').val());
             $('#bluSurvey').fadeIn();
+            prevSurveySection = 'form';
         }
     });
 
+    // Next Buttons
     $('#next1').click(function() {
         currentSurveySection = 'start';
         goNext(currentSurveySection);
@@ -425,6 +293,36 @@ jQuery(function($) {
     $('#nextSmoke').click(function() {
         currentSurveySection = 'smoke';
         goNext(currentSurveySection);
+    });
+
+    // Previous Buttons
+    $('#prev1').click(function() {
+        prevSurveySection = 'form';
+        goPrevious(prevSurveySection);
+    });
+
+    $('#prevVapeA').click(function() {
+        prevSurveySection = 'start';
+        goPrevious(prevSurveySection);
+    });
+
+    $('#prevVapeB').click(function() {
+        prevSurveySection = 'vapeA';
+        goPrevious(prevSurveySection);
+    });
+
+    $('#prevVapeC').click(function() {
+        prevSurveySection = 'vapeB';
+        goPrevious(prevSurveySection);
+    });
+
+    $('#prevSmoke').click(function() {
+        prevSurveySection = 'start';
+        goPrevious(prevSurveySection);
+    });
+
+    $('#prevFinal').click(function() {
+        goPrevious(prevSurveySection);
     });
 
     function validateSurveySection(currentSurveySection) {
@@ -461,7 +359,6 @@ function sendBacklog() {
                 success: function(result) {
                     console.log('backlog sent properly');
                     backlogFired = true;
-
                 },
                 statusCode: {
                     200: function (response) {
@@ -510,9 +407,9 @@ function sendBacklog() {
 
 function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlParsedObject) {
 
-    //We recomend using the "RAW" Base64 data and decoding it with the built-in "atob" function
+    // We recomend using the "RAW" Base64 data and decoding it with the built-in "atob" function
         
-    //Now you can call processing functions to handle the barcode scanner data however you'd like.
+    // Now you can call processing functions to handle the barcode scanner data however you'd like.
     // var ActiveObject = document.activeElement;
     // ActiveObject.value = scanData;
     // scanData = atob(dlParsedObject);
@@ -521,15 +418,44 @@ function DT_DecoderDataResponse(decoderData, rawDecoderData, symbologyType, dlPa
     // DT_AlertBoxRequest(12345, 'Scan Data', 'first name: ' + dlParsedObject.firstName, ['OK']);
 
     // Check if we're in the survey section
-    if (currentSurveySection) {
+    if (currentSurveySection == 'final') {
         scanCoupon(decoderData);
     } else {
         fillFormFields(decoderData, rawDecoderData, null, null, symbologyType, dlParsedObject);
     }
-}
+}   
 
 function DT_MSRDataResponse(msrData, msrDecoderData, dlParsedObject) {
     fillFormFields(null, null, msrData, msrDecoderData, null, dlParsedObject);
+}
+
+function checkAge(m, d, y) {
+
+    // Make sure the date actually exists. Could definitely clean this up.
+    if ($('#bluForm-dob').val()) {
+        var str = $('#bluForm-dob').val(),
+            y = str.substr(6,4),
+            m = str.substr(0,2),
+            d = str.substr(3,2);
+
+        if ((m > '12') || (d > '31')) {
+            $('#bluForm-dob').toggleClass('warn');
+        } else if ((m >= 1) && (d >= 1) && (y >= 1)) {
+            var birthday = moment([y, (m - 1) , d]),
+            now = moment();
+
+            age = now.diff(birthday, 'years');
+
+            if (age < 18) {
+                alert('Sorry, you must be at least 18 to participate.');
+            } else {
+                // set the reformatted DOB for final submission
+                reformattedDOB = y + '-' + m + '-' + d;
+            }
+        } else {
+            $('#bluForm-dob').toggleClass('warn');
+        }
+    }
 }
 
 // Get List of events
@@ -538,12 +464,22 @@ $('#updateEventList').click(function() {
 });
 
 $('#submit').click(function (event) {
+    var sampleValid = $('input:radio[name="sampling_flavor"]').is(':checked'),
+        kitValid = $('input:radio[name="sampling_kit"]').is(':checked');
     event.preventDefault();
-    updateTimestamp();
-    updateEventID();
-    formData = JSON.stringify([$('#bluForm').serializeJSON()]);
 
-    if(!($('#bluForm-sample :selected').val() == '')) {
+    // Sample & kit validation should be working now
+    if (!sampleValid) {
+        alert('Please choose a sample.')
+    } else if (!kitValid) {
+        alert('Did you give away a kit?')
+    } else if (sampleValid && kitValid) {
+        // ninja insert the date in the correct format
+        $('#bluForm-dob').val(reformattedDOB);
+        updateTimestamp();
+        updateEventID();
+        formData = JSON.stringify([$('#bluForm').serializeJSON()]);
+
         $.ajax({
             type: "POST",
             url: "http://blu.momentum.networkninja.com/api/v1/save",
@@ -556,10 +492,14 @@ $('#submit').click(function (event) {
                 console.log(arrayLength);
                 if (arrayLength > 0 ) {
                     console.log('backlog found: ' + arrayLength + ' entries')
-                  sendBacklog();
+                    sendBacklog();
                 }
 
                 alert('Data has been successfully submitted!');
+
+                setTimeout(function() {
+                     window.location.reload();
+                }, 2000);
             },
             statusCode: {
                 200: function (response) {
@@ -584,45 +524,14 @@ $('#submit').click(function (event) {
             error: function (e) {
                 alert('No network detected. Data has been cached.');
                 window.localStorage.pushArrayItem('storedSubmissions', formData);
+
+                setTimeout(function() {
+                     offlineReset();
+                }, 2000);
             }
         });
 
-        setTimeout(function() {
-             window.location.reload();
-        }, 2000);
-        
-    } else {
-        alert('Please select a sample!');
     }
-
-    // for (var i = 0; i < (data.length); i++) {
-    //     console.log(data[i]);
-    //     if (data[i] != formData) {
-    //         // if data isn't a duplicate
-
-    //         console.log('not a duplicate!');
-
-    //         var jsonData = JSON.stringify(data[i]);
-
-    //         console.log(jsonData);
-
-    //         $.ajax({
-    //             type: "POST",
-    //             url: "http://blu.momentum-stage.networkninja.com.com/api/v1/api.php",
-    //             data: jsonData
-    //         }).done(function(response) {
-    //             console.log("Successfully submitted: " + response);
-    //             signupComplete();
-    //             submitFired = true;
-    //         }).fail(function(response) {
-    //             console.log("Submitting failed:" + response);
-    //             window.localStorage.pushArrayItem('data', formData);
-    //             submitFired = false;
-    //         });
-    //     }
-    // }
-
-    // return false; // prevent page refresh
 });
 
 function fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, symbologyType, dlParsedObject) {
@@ -694,7 +603,8 @@ function fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, sy
             m = str.substr(4,2),
             y = str.substr(0,4);
 
-        $('#bluForm-dob').val(y + '-' + m + '-' + d);
+        $('#bluForm-dob').val(m + '-' + d + '-' + y);
+        checkAge(y, m, d);
     } else {
         console.log(DOB + ' is undefined')
     }
@@ -718,6 +628,33 @@ function scanCoupon(decoderData) {
     $('#couponCode').val(decoderData);
 }
 
+// offline form resetting functionality
+function offlineReset() {
+    // reset variables
+    prevSurveySection = null;
+    submitFired = null;
+    backlogFired = null;
+    triedblu = null;
+    triedEcig = null;
+    reformattedDOB = null;
+    age = null;
+
+    $('#bluForm')[0].reset();
+    $('#bluForm').trigger('reset');
+    $('input#optin-y').prop('checked', true);
+    $('.warn').removeClass('warn');
+    // hide all of the initial stuff
+    $('section#vapeA').fadeOut();
+    $('section#vapeB').fadeOut();
+    $('div#whyNotBlu').fadeOut();
+    $('section#vapeC').fadeOut();
+    $('section#smoke').fadeOut();
+    $('div#pastBrands').fadeOut();
+    $('section#final').fadeOut();
+    $('#bluSurvey').fadeOut();
+    $('#bluForm-email').css('display', 'block');
+}
+
 function updateDeviceID() {
     var latestDeviceID = localStorage['deviceID'];
     if (latestDeviceID) {
@@ -726,19 +663,22 @@ function updateDeviceID() {
         $('#device_id').val(latestDeviceID);
         $('#deviceIDError').fadeOut();
     } else {
-        $('#deviceIDError').fadeIn();
+        $('#deviceIDMsg').html('No Device ID!');
+        $('#deviceIDMsg').addClass('warn');
     }
 }
 
 function updateEventID() {
-    var latestEventID = localStorage['eventID'];
-    if (latestEventID) {
+    var latestEventID = localStorage['eventID'],
+        latestEventName = localStorage['eventName'];
+    if (latestEventID != 'undefined') {
         console.log('Event ID = ' + latestEventID);
         $('#currentEventID').html(latestEventID);
         $('#events_id').val(latestEventID);
-        $('#eventIDError').fadeOut();
+        $('#eventIDMsg').html('Event: ' + latestEventName);
     } else {
-        $('#eventIDError').fadeIn();
+        $('#eventIDMsg').html('No Event ID!');
+        $('#eventIDMsg').css('color', 'red');
     }
 }
 
@@ -799,38 +739,37 @@ function getEvents() {
 }
 
 function goNext(currentPage) {
+    console.log(currentPage);
     switch (currentPage) {
         case 'start':
-            console.log(currentPage);
-            var smokerType = $('input[name=current_product_use]:checked', '#bluForm').val();
+            var smokerType = $('input[name="current_product_use"]:checked', '#bluForm').val();
             console.log(smokerType);
             if ((smokerType == 'Vape') || (smokerType == 'Both')) {
-                // currentPage = 'vapeA';
                 $('section#start').fadeOut();
                 setTimeout(function() {
                     $('section#vapeA').fadeIn();
                 }, 800);
             } else if (smokerType == 'Smoke') {
-                // currentPage = 'smoke';
                 $('section#start').fadeOut();
                 setTimeout(function() {
                     $('section#smoke').fadeIn();
                 }, 800);
             } else if (smokerType == 'Neither') {
-                // currentPage = 'final';
                 $('section#start').fadeOut();
                 setTimeout(function() {
                     $('section#final').fadeIn();
                 }, 800);
             } else {
-                // alert('Answer the question!')
                 console.log('nothing chosen!');
             }
+
+            prevSurveySection = 'start';
+
             break;
 
         case 'vapeA':
             console.log(currentPage);
-            var usualBrand = $( "#usualBrand" ).val();
+            var usualBrand = $('input[name="current_ecig_brand"]:checked').val();
             console.log(usualBrand);
             if (usualBrand == 'blu') {
                 // currentPage = 'final';
@@ -855,6 +794,9 @@ function goNext(currentPage) {
                 console.log('please choose a brand!');
                 $('#usualBrand').addClass('warn');
             }
+
+            prevSurveySection = 'vapeA';
+
             break;
 
         case 'vapeB':
@@ -864,6 +806,9 @@ function goNext(currentPage) {
             setTimeout(function() {
                 $('section#final').fadeIn();
             }, 800);
+
+            prevSurveySection = 'vapeB';
+
             break;
 
         case 'vapeC':
@@ -873,6 +818,9 @@ function goNext(currentPage) {
             setTimeout(function() {
                 $('section#final').fadeIn();
             }, 800);
+
+            prevSurveySection = 'vapeC';
+
             break;
 
         case 'smoke':
@@ -882,6 +830,85 @@ function goNext(currentPage) {
             setTimeout(function() {
                 $('section#final').fadeIn();
             }, 800);
+
+            prevSurveySection = 'smoke';
+
+            break;
+
+        default:
+            console.log('Nothing was caught');
+    }
+}
+
+function goPrevious(previousPage) {
+    console.log(previousPage);
+    switch (previousPage) {
+        case 'form':
+            $('#bluSurvey').fadeOut();
+            currentSurveySection = null;
+
+            break;
+
+        case 'start':
+            $('section#vapeA').fadeOut();
+            $('input[name="vape_use_duration"]').prop('checked', false);
+            $('input[name="current_ecig_brand"]').prop('checked', false);
+            $('section#smoke').fadeOut();
+            $('input[name="tried_ecig"]').prop('checked', false);
+            $('input:checkbox').attr('checked', false);
+            $('section#final').fadeOut();
+            $('input[name="sampling_flavor"]').prop('checked', false);
+            $('input[name="sampling_kit"]').prop('checked', false);
+            setTimeout(function() {
+                $('section#start').fadeIn();
+            }, 800);
+            currentSurveySection = 'start';
+
+            break;
+
+        case 'vapeA':
+            $('section#vapeB').fadeOut();
+            $('input[name="tried_blu"]').prop('checked', false);
+            $('input[name="blu_no_reason"]').prop('checked', false);
+            setTimeout(function() {
+                $('section#vapeA').fadeIn();
+            }, 800);
+            currentSurveySection = 'vapeA';
+
+            break;
+
+        case 'vapeB':
+            $('section#vapeC').fadeOut();
+            $('input[name="why_mod"]').prop('checked', false);
+            setTimeout(function() {
+                $('section#vapeB').fadeIn();
+            }, 800);
+            currentSurveySection = 'vapeB';
+
+            break;
+
+        case 'vapeC':
+            $('section#final').fadeOut();
+            $('input[name="sampling_flavor"]').prop('checked', false);
+            $('input[name="sampling_kit"]').prop('checked', false);
+            setTimeout(function() {
+                $('section#vapeC').fadeIn();
+            }, 800);
+            
+            currentSurveySection = 'vapeC';
+
+            break;
+
+        case 'smoke':
+            $('section#final').fadeOut();
+            $('input[name="sampling_flavor"]').prop('checked', false);
+            $('input[name="sampling_kit"]').prop('checked', false);
+            setTimeout(function() {
+                $('section#smoke').fadeIn();
+            }, 800);
+            
+            currentSurveySection = 'smoke';
+
             break;
 
         default:
@@ -926,16 +953,26 @@ function validateForm() {
         valid = false;
     }
 
+    if (!$('input[name="gender"]:checked').val()) {
+        valid = false;
+    }
+
     // Make sure the date actually exists
     if ($('#bluForm-dob').val()) {
         var str = $('#bluForm-dob').val(),
-            y = str.substr(0,4),
-            m = str.substr(5,2),
-            d = str.substr(8,2);
+            y = str.substr(6,4),
+            m = str.substr(0,2),
+            d = str.substr(3,2);
 
         if ((m > '12') || (d > '31')) {
             $('#bluForm-dob').toggleClass('warn');
             valid = false;
+        } else if (age < 18) {
+            alert('Sorry, you must be at least 18 to participate.');
+            $('#bluForm-dob').toggleClass('warn');
+            valid = false;
+        } else {
+            console.log($('#bluForm-dob').val());
         }
 
     } else {
@@ -1014,12 +1051,12 @@ Storage.prototype.getObj = function(key) {
     return JSON.parse(this.getItem(key))
 }
 
-// Detect user keypress to hide iPad keyboard
+// Detect user keypress to hide keyboard
 $(document).keypress(function(e) {
     //if user presses go/return/enter
     if(e.which == 13) {
         //hide ipad keyboard
         document.activeElement.blur();
-        $("input").blur();
+        $('input').blur();
     }
 });
