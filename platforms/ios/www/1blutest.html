@@ -50,17 +50,30 @@
           <span class="close" id="closeButton">&times;</span>
           <div class="field container clearfix">
             <input placeholder="Device ID" id="deviceIDField" type="text" class="sm-form-control" /><button id="setDeviceID" class="button-small button">Set ID</button>
-            Current Device ID: <span id="currentDeviceID">No ID Set.</span>
+            ID: <span id="currentDeviceID">No ID Set.</span>
           </div>
           <div class="field container clearfix">
             <select placeholder="Event ID" id="eventIDField" name="eventID" class="sm-form-control">
               <option value="" disabled selected>Choose Event</option>
             </select><button id="setEventID" class="button-small button">Set ID</button>
-            Current Event ID: <span id="currentEventID">No ID Set.</span>
+            ID: <span id="currentEventID">No ID Set.</span>
           </div>
-          <div class="container clearfix">
+          <!-- <div class="container clearfix">
             <a href="#" id="updateEventList" class="button button-3d fcenter">Update Event List</a>
+          </div> -->
+          <div class="clear"></div>
+          <div class="container clearfix">
+            <a href="#" id="showCache" class="button button-3d fcenter">View Cache</a>
+            <div class="clear"></div>
+            <a href="#" id="submitCache" class="button button-3d fcenter">Submit Cache</a>
           </div>
+        </div>
+      </section>
+
+      <section id="cacheWindow">
+        <div id="devCache">
+          <span class="close" id="closeCache">&times;</span>
+          <textarea id="cacheText" spellcheck="false" autocomplete="off"></textarea>
         </div>
       </section>
 

@@ -32,7 +32,7 @@ var formData,
     submissionBacklog = [],
     currentSurveySection,
     submitFired,
-    backlogFired,
+    backlogFired = false,
     triedblu,
     triedEcig,
     reformattedDOB,
@@ -232,6 +232,15 @@ jQuery(function($) {
         $('#hiddenMenu').fadeOut();
     });
 
+    $('#closeCache').click(function() {
+        $('#cacheWindow').fadeOut();
+    });
+
+    // select text on click/tap
+    $('#cacheText').click(function () {
+       $(this).select();
+    });
+
     $('#setDeviceID').click(function() {
         var deviceID = $('#deviceIDField').val();
         if (!deviceID) {
@@ -241,6 +250,10 @@ jQuery(function($) {
             updateDeviceID();
             // Get list of events based on latest device ID
             getEvents();
+            // clear Event ID
+            localStorage['eventID'] = '';
+            localStorage['eventName'] = '';
+            updateEventID();
         }
     });
 
@@ -252,13 +265,31 @@ jQuery(function($) {
         } else {
             localStorage['eventID'] = eventID;
             localStorage['eventName'] = eventName;
-            updateEventID();
         }
+
+        updateEventID();
     });
 
     $('#clearStorage').click(function () {
         window.localStorage.deleteArray('data');
         console.log('Storage deleted');
+    });
+
+    $('#showCache').click(function () {
+        $('#cacheWindow').fadeIn();
+        storedData = window.localStorage.getArray('storedSubmissions');
+        var cacheString = JSON.stringify(storedData);
+        console.log(cacheString);
+        $('#cacheText').html(cacheString);
+
+        // for (var i = 0; i < (storedData.length); i++) {
+        //     console.log(storedData[i]);
+        //     storedData[i] {
+        // }
+    });
+
+    $('#submitCache').click(function () {
+        sendBacklog();
     });
 
     $('#startSurvey').click(function() {
@@ -347,6 +378,8 @@ function sendBacklog() {
 
     storedData = window.localStorage.getArray('storedSubmissions');
 
+    var entriesSubmitted = 0;
+
     for (var i = 0; i < (storedData.length); i++) {
         console.log(storedData[i]);
         if (storedData[i] != formData) {
@@ -358,41 +391,50 @@ function sendBacklog() {
                 data: {data : storedData[i]},
                 success: function(result) {
                     console.log('backlog sent properly');
-                    backlogFired = true;
+                    entriesSubmitted++;
                 },
                 statusCode: {
                     200: function (response) {
                         console.log('Success!')
                     },
                     400: function (response) {
-                        console.log('Bad Request')
+                        console.log('Bad Request');
+                        backlogFired = false;
                     },
                     400: function (response) {
-                        console.log('Bad Request')
+                        console.log('Bad Request');
+                        backlogFired = false;
                     },
                     404: function (response) {
-                        console.log('Unknown Method')
+                        console.log('Unknown Method');
+                        backlogFired = false;
                     },
                     500: function (response) {
                         console.log(response.responseText);
+                        backlogFired = false;
                     },
                     503: function (response) {
-                        console.log('Service unavailable')
+                        console.log('Service unavailable');
+                        backlogFired = false;
                     }
                 },
                 error: function (e) {
-                    console.log("Backlog wasn't sent");
                     backlogFired = false;
                 }
             });
         }
     }
 
-    console.log("backlogFired = " + backlogFired);
+    console.log(backlogFired);
 
     if (backlogFired != false) {
+        alert(entriesSubmitted + ' items submitted.');
         window.localStorage.deleteArray('storedSubmissions');
-        console.log("emails array deleted");
+        console.log('emails array deleted');
+    } else {
+        if(entriesSubmitted != 0) {
+            alert('Error submitting cache.');
+        }
     }
 }
 
@@ -662,6 +704,7 @@ function updateDeviceID() {
         $('#currentDeviceID').html(latestDeviceID);
         $('#device_id').val(latestDeviceID);
         $('#deviceIDError').fadeOut();
+        $('#')
     } else {
         $('#deviceIDMsg').html('No Device ID!');
         $('#deviceIDMsg').addClass('warn');
@@ -671,14 +714,16 @@ function updateDeviceID() {
 function updateEventID() {
     var latestEventID = localStorage['eventID'],
         latestEventName = localStorage['eventName'];
-    if (latestEventID != 'undefined') {
+    if (latestEventID != '') {
         console.log('Event ID = ' + latestEventID);
         $('#currentEventID').html(latestEventID);
         $('#events_id').val(latestEventID);
+        $('#eventIDMsg').css('color', 'black');
         $('#eventIDMsg').html('Event: ' + latestEventName);
     } else {
         $('#eventIDMsg').html('No Event ID!');
         $('#eventIDMsg').css('color', 'red');
+        $('#currentEventID').html('No Event ID');
     }
 }
 
@@ -687,6 +732,8 @@ function getEvents() {
 
     if (deviceID) {
         var eventObject = [];
+
+        $('select#eventIDField').empty();
 
         $.ajax({
             type: 'POST',

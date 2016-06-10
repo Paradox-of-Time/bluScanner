@@ -68,7 +68,7 @@ h1#main-header {
 
 /* Initial Section Hiding */
 
-section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, section#vapeC, section#smoke, div#pastBrands, section#final {
+section#hiddenMenu, section#cacheWindow, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, section#vapeC, section#smoke, div#pastBrands, section#final {
   display: none;
 }
 
@@ -86,7 +86,7 @@ section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, 
 }
 
 /* 1136 x 640 */
-#hiddenMenu {
+#hiddenMenu, #cacheWindow {
   z-index: 999 !important;
   position: fixed;
   background-color: rgba(55,55,55,.8);
@@ -96,36 +96,66 @@ section#hiddenMenu, div#bluSurvey, section#vapeA, section#vapeB, div#whyNotBlu, 
   height: 100%;
 }
 
-#hiddenMenu > div#devMenu {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  height: 350px;
-  width: 310px;
-  margin-top: -175px;
-  margin-left: -155px;
+#hiddenMenu > div#devMenu, #cacheWindow > div#devCache {
+  height: 400px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
   background-color: white;
   z-index: 999 !important;
   font-size: 12px;
 }
 
+#cacheWindow > div#devCache {
+  z-index: 1200 !important;
+}
+
+#hiddenMenu a {
+  font-size: 9px;
+}
+
+#devMenu {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#devMenu .container {
+  width: 100% !important;
+  margin: 20px;
+}
+
+#cacheText {
+  width: 270px;
+  height: 290px;
+  position: relative;
+  resize: none;
+  font-size: 5px;
+  font-family: consolas, monospace;
+  margin: 10px 0 0 10px;
+  overflow: scroll;
+}
+
 #hiddenMenu div.container.field {
-  padding: 30px;
-  width: 310px !important;
+  padding: 0;
+  width: 80% !important;
 }
 
 #hiddenMenu input,
 #hiddenMenu select {
-  width: 100%;
+  width: 80%;
 }
 
 #hiddenMenu a#updateEventList,
 #hiddenMenu .container {
-  margin: 0 auto;
+  padding-left: 0;
 }
 
-#closeButton {
+#closeButton, #closeCache {
   padding: 10px;
+}
+
+#closeCache {
+  z-index: 1500 !important;
 }
 
 #startSurvey {
