@@ -124,25 +124,39 @@ section#hiddenMenu, section#cacheWindow, div#bluSurvey, section#vapeA, section#v
   margin: 20px;
 }
 
+#devMenu .idInfo {
+  width: 100%;
+}
+
+#devMenu .cacheInfo {
+  margin-top: 5px;
+}
+
+#devMenu h3 {
+  margin-bottom: 0;
+  padding-bottom: 5px;
+}
+
 #cacheText {
-  width: 270px;
-  height: 290px;
-  position: relative;
+  width: 85%;
+  height: 85%;
   resize: none;
   font-size: 5px;
   font-family: consolas, monospace;
-  margin: 10px 0 0 10px;
+  margin: 10px;
+  padding: 10%;
   overflow: scroll;
 }
 
-#hiddenMenu div.container.field {
+#hiddenMenu div.field {
   padding: 0;
+  margin: 10px 0;
   width: 80% !important;
 }
 
 #hiddenMenu input,
 #hiddenMenu select {
-  width: 80%;
+  width: 100%;
 }
 
 #hiddenMenu a#updateEventList,

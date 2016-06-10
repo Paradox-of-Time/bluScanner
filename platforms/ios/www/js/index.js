@@ -62,7 +62,7 @@ function handleCacheEvent(e) {
       return 'OBSOLETE';
       break;
     default:
-      return 'UKNOWN CACHE STATUS';
+      return 'UNKNOWN CACHE STATUS';
       break;
   };
 }
@@ -390,7 +390,7 @@ function sendBacklog() {
                 dataType: "json",
                 data: {data : storedData[i]},
                 success: function(result) {
-                    console.log('backlog sent properly');
+                    console.log('backlog entry sent');
                     entriesSubmitted++;
                 },
                 statusCode: {
@@ -621,7 +621,7 @@ function fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, sy
     }
 
     if (STATE) {
-        $('#bluForm-state').val(STATE);
+        $('#bluForm-state :selected').val(STATE);
     } else {
         console.log(STATE + ' is undefined');
         $('#bluForm-state').toggleClass('warn');
@@ -995,6 +995,11 @@ function validateForm() {
             valid = false;
         }
     });
+
+    if ($("#bluForm-state :selected").val() == '') {
+        valid = false;
+        console.log('state not valid');
+    }
 
     if (!$('input[name="opt_in"]:checked').val()) {
         valid = false;
