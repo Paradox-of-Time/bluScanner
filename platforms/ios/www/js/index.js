@@ -621,7 +621,7 @@ function fillFormFields(decoderData, rawDecoderData, msrData, msrDecoderData, sy
     }
 
     if (STATE) {
-        $('#bluForm-state :selected').val(STATE);
+        $('#bluForm-state').val(STATE);
     } else {
         console.log(STATE + ' is undefined');
         $('#bluForm-state').toggleClass('warn');
