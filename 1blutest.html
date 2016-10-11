@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<html manifest="manifest.appcache">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- External Styles -->
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,400italic,600,700|Raleway:300,400,500,600,700|Crete+Round:400italic" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+    <!-- <link rel="stylesheet" href="css/animate.css" type="text/css" /> -->
+    <link rel="stylesheet" href="css/responsive.css" type="text/css" />
+    <link rel="stylesheet" href="css/main.css" type="text/css" />
+
+    <!-- External JS -->
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/jquery.tap.js"></script>
+    <script type="text/javascript" src="js/plugins.js"></script>
+    <script type="text/javascript" src="js/jquery.serializejson.min.js"></script>
+    <script type="text/javascript" src="js/moment.min.js"></script>
+
+    <!--[if lt IE 9]>
+        <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <![endif]-->
+    <title>blu Scanner</title>
+  </head>
+  <body>
+
+    <section id="hiddenMenu">
+      <div id="devMenu">
+        <span class="close" id="closeButton">&times;</span>
+        <div class="idInfo container clearfix">
+          <h3>Identifiers</h3>
+          <p class="clearfix">
+            Double tap the lock to set the Device ID.
+            <br>You should <b>not</b> need to change this once set.
+          </p>
+          <div class="field event-field clearfix">
+            <select placeholder="Event ID" id="eventIDField" name="eventID" class="sm-form-control">
+              <option value="" disabled selected>Choose Event</option>
+            </select><button id="setEventID" class="button-small button">Set ID</button>
+            ID: <span id="currentEventID">No ID Set.</span>
+          </div>
+          <div class="field device-field clearfix">
+            <input placeholder="Device ID" id="deviceIDField" type="text" class="sm-form-control" /><a href="#" id="deviceLock"><img src="img/lock.png" alt=""></a>
+            <div class="clear"></div>
+            <button id="setDeviceID" class="button-small button">Set ID</button>
+            <!-- ID: <span id="currentDeviceID">No ID Set.</span> -->
+          </div>
+        </div>
+        <!-- <div class="container clearfix">
+          <a href="#" id="updateEventList" class="button button-3d fcenter">Update Event List</a>
+        </div> -->
+        <div class="clear"></div>
+        <div class="cacheInfo container clearfix">
+          <h3>Cache</h3>
+          <div>Entries in cache: <span id="unsubmittedEntries">0</span></div>
+          <a href="#" id="showCache" class="button button-3d fcenter">Debug</a>
+          <a href="#" id="submitCache" class="button button-3d fcenter">Submit</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="cacheWindow">
+      <div id="devCache">
+        <span class="close" id="closeCache">&times;</span>
+        <textarea id="cacheText" spellcheck="false" autocomplete="off"></textarea>
+      </div>
+    </section>
+
+    <section id="content" class="app">
+
+      <div class="content-wrap">
+
+        <div class="container clearfix">
+          <div class="row clearfix">
+            <div class="col-xs-5">
+              <img src="img/blu-logo.png" id="bluLogo" alt="blu">
+              <h3>About You</h3>
+            </div>
+            <div class="col-xs-7">
+              <h5 id="deviceIDMsg"></h5>
+              <h5 id="eventIDMsg">No Event ID Selected!</h5>
+            </div>
+          </div>
+
+          <div class="row clearfix">
+            <div class="col-md-6">
+              <!-- <img src="img/blu-logo.png" id="bluLogo" alt="blu">
+              <h3>About You</h3> -->
+
+              <div class="clear"></div>
+              <!-- TESTING ONLY <a href="#" id="submit" class="button button-3d fcenter">Submit</a> -->
+
+              <form id="bluForm" name="bluForm" class="nobottommargin" action="#" novalidate method="post">
+                <section id="dlInfo">
+                  <div class="col_half">
+                    <!-- <label for="bluForm-name">First Name:</label> -->
+                    <input placeholder="First Name" type="text" id="bluForm-name" name="first_name" value="" class="sm-form-control required" />
+                  </div>
+
+                  <div class="col_half col_last">
+                    <!-- <label for="bluForm-lname">Last Name:</label> -->
+                    <input placeholder="Last Name" type="text" id="bluForm-lname" name="last_name" value="" class="sm-form-control required" />
+                  </div>
+
+                  <div class="clear"></div>
+
+                  <div class="col_half">
+                    <label for="bluForm-dob">DOB:&nbsp;</label>
+                    <input type="text" pattern="[0-9]*" id="bluForm-dob" name="dob" value="" placeholder="MM-DD-YYYY" maxlength="10" class="bluForm-dob sm-form-control required autotab" />
+                  </div>
+
+                  <div class="clear"></div>
+
+                  <div>
+                    <!-- <label for="bluForm-sex">Gender:</label> -->
+                    <div class="bluForm-sex multi">
+                      <ul>
+                        <li><input type="radio" name="gender" id="bluForm-sex-f" class="bluForm-sex required" value="Female"><label for="bluForm-sex-f">Female</label><div class="check"></div></li>
+                        <li><input type="radio" name="gender" id="bluForm-sex-m" class="bluForm-sex required" value="Male"><label for="bluForm-sex-m">Male</label><div class="check"></div></li>
+                        <li class="last-item"><input type="radio" name="gender" id="bluForm-sex-n" class="bluForm-sex required" value="NA"><label for="bluForm-sex-n">N/A</label><div class="check"></div></li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="clear"></div>
+
+                  <div class="col_half">
+                    <!-- <label for="bluForm-address">Address:</label> -->
+                    <input placeholder="Street Address" type="text" id="bluForm-address1" name="address" value="" class="sm-form-control required" />
+                  </div>
+
+                  <div class="col_half col_last">
+                    <!-- <label for="bluForm-address">Address:</label> -->
+                    <input placeholder="Apt, Suite, etc." type="text" id="bluForm-address2" name="address_2" value="" class="sm-form-control" />
+                  </div>
+
+                  <div class="col_full">
+                    <!-- <label for="bluForm-city">City</label> -->
+                    <input placeholder="City" type="text" id="bluForm-city" name="city" value="" class="sm-form-control required" />
+                  </div>
+
+                  <div class="col_half">
+                    <!-- <label for="bluForm-state">State</label> -->
+                    <select placeholder="State" id="bluForm-state" name="state" class="sm-form-control required">
+                      <option value="" disabled selected>State</option>
+                      <option value="AL">Alabama</option>
+                      <option value="AK">Alaska</option>
+                      <option value="AZ">Arizona</option>
+                      <option value="AR">Arkansas</option>
+                      <option value="CA">California</option>
+                      <option value="CO">Colorado</option>
+                      <option value="CT">Connecticut</option>
+                      <option value="DE">Delaware</option>
+                      <option value="DC">District Of Columbia</option>
+                      <option value="FL">Florida</option>
+                      <option value="GA">Georgia</option>
+                      <option value="HI">Hawaii</option>
+                      <option value="ID">Idaho</option>
+                      <option value="IL">Illinois</option>
+                      <option value="IN">Indiana</option>
+                      <option value="IA">Iowa</option>
+                      <option value="KS">Kansas</option>
+                      <option value="KY">Kentucky</option>
+                      <option value="LA">Louisiana</option>
+                      <option value="ME">Maine</option>
+                      <option value="MD">Maryland</option>
+                      <option value="MA">Massachusetts</option>
+                      <option value="MI">Michigan</option>
+                      <option value="MN">Minnesota</option>
+                      <option value="MS">Mississippi</option>
+                      <option value="MO">Missouri</option>
+                      <option value="MT">Montana</option>
+                      <option value="NE">Nebraska</option>
+                      <option value="NV">Nevada</option>
+                      <option value="NH">New Hampshire</option>
+                      <option value="NJ">New Jersey</option>
+                      <option value="NM">New Mexico</option>
+                      <option value="NY">New York</option>
+                      <option value="NC">North Carolina</option>
+                      <option value="ND">North Dakota</option>
+                      <option value="OH">Ohio</option>
+                      <option value="OK">Oklahoma</option>
+                      <option value="OR">Oregon</option>
+                      <option value="PA">Pennsylvania</option>
+                      <option value="RI">Rhode Island</option>
+                      <option value="SC">South Carolina</option>
+                      <option value="SD">South Dakota</option>
+                      <option value="TN">Tennessee</option>
+                      <option value="TX">Texas</option>
+                      <option value="UT">Utah</option>
+                      <option value="VT">Vermont</option>
+                      <option value="VA">Virginia</option>
+                      <option value="WA">Washington</option>
+                      <option value="WV">West Virginia</option>
+                      <option value="WI">Wisconsin</option>
+                      <option value="WY">Wyoming</option>
+                      <!-- Outlying Territories -->
+                      <option value="AS">American Samoa</option>
+                      <option value="GU">Guam</option>
+                      <option value="MP">Northern Mariana Islands</option>
+                      <option value="PR">Puerto Rico</option>
+                      <option value="UM">United States Minor Outlying Islands</option>
+                      <option value="VI">Virgin Islands</option>
+                    </select>
+                  </div>
+
+                  <div class="col_half col_last">
+                    <!-- <label for="bluForm-zip">Zip</label> -->
+                    <input placeholder="Postal Code" pattern="[0-9]*" type="text" id="bluForm-zip" name="zip" value="" maxlength="5" class="sm-form-control required autotab" />
+                  </div>
+
+                  <div class="clear"></div>
+
+                  <div class="col_half col_last">
+                    <input placeholder="Phone" pattern="[0-9]*" type="tel" id="bluForm-phone" name="phone" value="" class="sm-form-control" />
+                  </div>
+
+                  <div class="clear"></div>
+
+                  <div>
+                    <h4>Enter your email below:</h4>
+                    <div class="multi">
+                      <div class="col_half col_last" id="email-address">
+                        <input placeholder="Email" type="email" id="bluForm-email" name="email" value="" class="sm-form-control required" />
+                      </div>
+                     <!--  <ul>
+                        <li><input type="radio" name="opt_in" id="optin-y" value="true" checked="checked"><label class="optin required" for="optin-y">Yes</label><div class="check"></div></li>
+                        <li class="last-item"><input type="radio" name="opt_in" id="optin-n" value="false"><label class="optin required" for="optin-n">No</label><div class="check"></div></li>
+                      </ul> -->
+                    </div>
+                  </div>
+
+                  
+
+                  <div class="clear"></div>
+
+                </section>
+
+                <div>
+                  <input type="hidden" name="device_id" id="device_id">
+                  <input type="hidden" name="events_id" id="events_id">
+                  <input type="hidden" name="timestamp" id="timestamp">
+                  <input type="hidden" name="opt_in" id="optin" value="true">
+                  <!-- Testing entry method tracking. Check in NNI... -->
+                  <input type="hidden" name="entry_method" id="entryMethod">
+                  <!-- <input type="hidden" name="coupon_code" id="couponCode" /> -->
+                  <input type="hidden" name="communication_opt_in" id="optin2">
+                  <input type="hidden" name="initial_lead_id" id="initialID">
+                </div>
+
+                <button id="startSurvey" type="button" class="button-small button">Start Survey</button>
+
+                <div class="clear"></div>
+
+                <div id="bluSurvey">
+
+                  <section id="start">
+                    <div>
+                      <h4>What do you currently do?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="current_product_use" id="currentUse-e" value="Vape"><label class="currentUse" for="currentUse-e">Vape</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_product_use" id="currentUse-c" value="Smoke"><label class="currentUse" for="currentUse-c">Smoke</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_product_use" id="currentUse-b" value="Both"><label class="currentUse" for="currentUse-b">Both</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_product_use" id="currentUse-n" value="Neither"><label class="currentUse" for="currentUse-n">Neither</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="clear"></div>
+                    <a href="#" id="prev1" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="next1" class="button button-small button-3d fcenter">Next &gt;</a>
+                  </section>
+
+                  <section id="vapeA">
+                    <div id="useLength">
+                      <h4>How long have you been vaping?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="vape_use_duration" id="useLength-0" value="Less than 6 months"><label class="useLength" for="useLength-0">Less Than 6 Months</label><div class="check"></div></li>
+                          <li><input type="radio" name="vape_use_duration" id="useLength-6m" value="6 months – 11 months"><label class="useLength" for="useLength-6m">6 Months &#8211; 11 Months</label><div class="check"></div></li>
+                          <li><input type="radio" name="vape_use_duration" id="useLength-1y" value="1 – 2 years"><label class="useLength" for="useLength-1y">1 &#8211; 2 Years</label><div class="check"></div></li>
+                          <li><input type="radio" name="vape_use_duration" id="useLength-2y" value="More than 2 years"><label class="useLength" for="useLength-2y">More Than 2 Years</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div id="currentBrand">
+                      <h4>What's your current usual brand?</h4>
+                      <div id="usualBrand" class="multi">
+                        <ul>
+                          <li><input type="radio" name="current_ecig_brand" id="currentBrand-blu" value="blu"><label for="currentBrand-blu">blu</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_ecig_brand" id="currentBrand-vuse" value="VUSE"><label for="currentBrand-vuse">VUSE</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_ecig_brand" id="currentBrand-markten" value="MarkTen"><label for="currentBrand-markten">MarkTen</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_ecig_brand" id="currentBrand-njoy" value="NJOY"><label for="currentBrand-njoy">NJOY</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_ecig_brand" id="currentBrand-logic" value="Logic"><label for="currentBrand-logic">Logic</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_ecig_brand" id="currentBrand-refillable" value="Refillable"><label for="currentBrand-refillable">Refillable/Mod Device</label><div class="check"></div></li>
+                          <li><input type="radio" name="current_ecig_brand" id="currentBrand-other" value="Other"><label for="currentBrand-other">Other</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="clear"></div>
+                    <a href="#" id="prevVapeA" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextVapeA" class="button button-small button-3d fcenter">Next &gt;</a>
+                  </section>
+
+                  <!-- <div id="deviceType">
+                    <h4>Do you use a mod device or an e-cig?</h4>
+                    <input type="radio" name="mod_or_ecig" id="deviceType-m" value="Mod"><label for="deviceType-m">Mod Device</label>
+                    <br><input type="radio" name="mod_or_ecig" id="deviceType-e" value="e-cig"><label for="deviceType-e">e-cig</label>
+                  </div> -->
+
+                  <section id="vapeB">
+                    <div>
+                      <h4>Have you tried blu before?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="tried_blu" id="triedBlu-y" value="Yes"><label class="triedBlu" for="triedBlu-y">Yes</label><div class="check"></div></li>
+                          <li><input type="radio" name="tried_blu" id="triedBlu-n" value="No"><label class="triedBlu" for="triedBlu-n">No</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <!-- Not initially visible -->
+                    <div id="whyNotBlu">
+                      <h4>Why haven't you tried blu?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="blu_no_reason" id="whyNot-a" value="Never heard of it"><label class="whyNot" for="whyNot-a">Never heard of it</label><div class="check"></div></li>
+                          <li><input type="radio" name="blu_no_reason" id="whyNot-b" value="Too expensive"><label class="whyNot" for="whyNot-b">Too expensive</label><div class="check"></div></li>
+                          <li><input type="radio" name="blu_no_reason" id="whyNot-c" value="Not in stock/usual place doesn't carry"><label class="whyNot" for="whyNot-c">Not in stock</label><div class="check"></div></li>
+                          <li><input type="radio" name="blu_no_reason" id="whyNot-d" value="Air flow/throat hit"><label class="whyNot" for="whyNot-d">Air flow/throat hit</label><div class="check"></div></li>
+                          <li><input type="radio" name="blu_no_reason" id="whyNot-e" value="Bad taste"><label class="whyNot" for="whyNot-e">Bad taste</label><div class="check"></div></li>
+                          <li><input type="radio" name="blu_no_reason" id="whyNot-f" value="None of the above"><label class="whyNot" for="whyNot-f">None of the above</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="clear"></div>
+                    <a href="#" id="prevVapeB" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextVapeB" class="button button-small button-3d fcenter">Next &gt;</a>
+                  </section>
+
+                  <section id="vapeC">
+                    <div>
+                      <h4>What made you choose refillable?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="why_mod" id="modReason-a" value="Battery Life"><label class="modReason" for="modReason-a">Battery Life</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-b" value="Flavor Selection"><label class="modReason" for="modReason-b">Flavor Selection</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-c" value="Recommended by a friend"><label class="modReason" for="modReason-c">Recommended by a friend</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-d" value="Nicotine Levels"><label class="modReason" for="modReason-d">Nicotine Levels</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-e" value="More Customization"><label class="modReason" for="modReason-e">More Customization</label><div class="check"><div class="inside"></div></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="why_mod" id="modReason-f" value="More Satisfying"><label class="modReason" for="modReason-f">More Satisfying</label><div class="check"><div class="inside"></div></li>
+                        </ul>
+                      </div>
+
+                      <div class="clear"></div>
+                      <a href="#" id="prevVapeC" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextVapeC" class="button button-small button-3d fcenter">Next &gt;</a>
+                    </div>
+                  </section>
+
+                  <section id="smoke">
+                    <div id="pastUse">
+                      <h4>Have you used eCigs in the past?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="tried_ecig" id="pastUse-y" value="Yes"><label class="pastUse" for="pastUse-y">Yes</label><div class="check"></div></li>
+                          <li><input type="radio" name="tried_ecig" id="pastUse-n" value="No"><label class="pastUse" for="pastUse-n">No</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <!-- Not initially visible -->
+                    <div id="pastBrands">
+                      <h4>What brands have you tried in the past?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="checkbox" name="ecig_brands_tried[]" id="pastBrands-blu" value="blu"><label class="pastBrands" for="pastBrands-blu">blu</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-vuse" value="VUSE"><label class="pastBrands" for="pastBrands-vuse">VUSE</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-markten" value="MarkTen"><label class="pastBrands" for="pastBrands-markten">MarkTen</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-njoy" value="NJOY"><label class="pastBrands" for="pastBrands-njoy">NJOY</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-logic" value="Logic"><label class="pastBrands" for="pastBrands-logic">Logic</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-refillable" value="Refillable"><label class="pastBrands" for="pastBrands-refillable">Refillable/Mod Device</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="checkbox" name="ecig_brands_tried[]" id="pastBrands-other" value="Other"><label class="pastBrands" for="pastBrands-other">Other</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div class="clear"></div>
+                    <a href="#" id="prevSmoke" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextSmoke" class="button button-small button-3d fcenter">Next &gt;</a>
+                  </section>
+                  
+                  <section id="final">
+                    <div id="sampleGiveaway">
+                      <h4>Please select your sample:</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-tobacco" value="Classic Tobacco"><label for="sampling-tobacco">Classic Tobacco</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-menthol" value="Magnificent Menthol"><label for="sampling-menthol">Magnificent Menthol</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-cherry" value="Cherry Crush"><label for="sampling-cherry">Cherry Crush</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor" id="sampling-vanilla" value="Vivid Vanilla"><label for="sampling-vanilla">Vivid Vanilla</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div id="kitGiveaway">
+                      <h4>Did you give away an Xpress Kit?</h4>
+                      <div class="multi col_one_fourth">
+                        <ul>
+                          <li><input type="radio" class="mobileCheckbox" name="sampling_kit" id="kit-xpress" value="Xpress Kit"><label for="kit-xpress">Yes</label><div class="check"></div></li>
+                          <li><input type="radio" class="mobileCheckbox" name="sampling_kit" id="kit-none" value="None"><label for="kit-none">No</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <!-- <div>
+                      <h4>Did you like your <span id="sampleFlavor"></span> sample?</h4>
+                      <input type="radio" name="liked_sample" id="likeSample-y" value="Yes"><label class="likeSample" for="likeSample-y">Yes</label>
+                      <br><input type="radio" name="liked_sample" id="likeSample-n" value="No"><label class="likeSample" for="likeSample-n">No</label>
+                    </div>
+
+                    <div>
+                      <h4>What didn't you like about your sample?</h4>
+                      <textarea name="liked_no_reason" id="whyNot2" cols="25" rows="5"></textarea>
+                    </div>
+
+                    <div>
+                      <h4>I see you didn't opt-in to blu Nation&hellip; do you want to opt-in to receive more offers and communication?</h4>
+                      <input type="radio" name="communication_opt_in" id="optin2-y" value="true"><label class="optin" for="optin2-y">Yes</label>
+                      <br><input type="radio" name="communication_opt_in" id="optin2-n" value="false"><label class="optin" for="optin2-n">No</label>
+                    </div> -->
+
+                    <div class="clear"></div>
+
+                    <div class="col_one_fourth coupon-container">
+                      <h4>Please scan the 5-digit tank coupon:</h4>
+                      <input placeholder="Tank Coupon Code" pattern="[0-9]*" type="text" id="couponCode" name="coupon_code" maxlength="5" value="" class="sm-form-control" />
+                    </div>
+
+                    <div class="col_one_fourth coupon-container">
+                      <h4>Please enter the 5-digit kit coupon:</h4>
+                      <input placeholder="Kit Coupon Code" pattern="[0-9]*" type="text" id="couponCodeKit" name="coupon_code_kit" maxlength="5" value="" class="sm-form-control" />
+                    </div>
+
+                    <div class="clear"></div>
+                      <a href="#" id="prevFinal" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="submit" class="button button-3d fcenter">Submit</a>
+                    </div>
+                  </section>
+                
+                </div>
+
+                <div id="bluSurvey2">
+
+                  <section id="revisitConfirmation">
+                    <div>
+                      <h4>Haven't we seen you before?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="repeat_customer" id="repeatCustomer-t" value="Yes"><label class="repeatCustomer" for="repeatCustomer-t">Yes!</label><div class="check"></div></li>
+                          <li><input type="radio" name="repeat_customer" id="repeatCustomer-f" value="No"><label class="repeatCustomer" for="repeatCustomer-f">Nope</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="clear"></div>
+                  </section>
+
+                  <section id="sampleFeedback">
+                    <div>
+                      <h4>Did you like your <span id="populatedSample"></span> Sample?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="liked_sample" id="likedSample-y" value="Yes"><label class="likedSample" for="likedSample-y">Yes</label><div class="check"></div></li>
+                          <li><input type="radio" name="liked_sample" id="likedSample-n" value="No"><label class="likedSample" for="likedSample-n">No</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="col_one_fourth" id="dislikedContainer">
+                      <h4>Why didn't you like your sample?</h4>
+                      <textarea name="liked_no_reason" id="dislikedReason" rows="5"></textarea>
+                    </div>
+                    <div class="clear"></div>
+                    <a href="#" id="prevRepeat1" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="nextRepeat1" class="button button-small button-3d fcenter">Next &gt;</a>
+                  </section>
+
+                  <section id="finalRepeat">
+                    <div id="sampleGiveaway2">
+                      <h4>Please select your new sample:</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor_2" id="sampling-2-tobacco" value="Classic Tobacco"><label for="sampling-2-tobacco">Classic Tobacco</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor_2" id="sampling-2-menthol" value="Magnificent Menthol"><label for="sampling-2-menthol">Magnificent Menthol</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor_2" id="sampling-2-cherry" value="Cherry Crush"><label for="sampling-2-cherry">Cherry Crush</label><div class="check"></div></li>
+                          <li><input class="mobileCheckbox" type="radio" name="sampling_flavor_2" id="sampling-2-vanilla" value="Vivid Vanilla"><label for="sampling-2-vanilla">Vivid Vanilla</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div class="clear"></div>
+
+                    <div class="col_one_fourth coupon-container">
+                      <h4>Please scan the 5-digit tank coupon:</h4>
+                      <input placeholder="Tank Coupon Code" pattern="[0-9]*" type="text" id="couponCode2" name="coupon_code_2" maxlength="5" value="" class="sm-form-control" />
+                    </div>
+
+                    <div class="clear"></div>
+                    
+                    <div class="col_one_fourth coupon-container">
+                      <h4>Please scan the 5-digit kit coupon:</h4>
+                      <input placeholder="Kit Coupon Code" pattern="[0-9]*" type="text" id="couponCodeKit2" name="coupon_code_2_kit" maxlength="5" value="" class="sm-form-control" />
+                    </div>
+
+                    <div class="clear"></div>
+                    <a href="#" id="prevFinal2" class="button button-small button-3d fcenter">&lt; Back</a><a href="#" id="submit2" class="button button-3d fcenter">Submit</a>
+                  </section>
+                  <!-- <section>
+                    <div>
+                      <h4>I see you didn't opt-in to blu Nation&hellip; do you want to opt-in to receive more offers and communication?</h4>
+                      <div class="multi">
+                        <ul>
+                          <li><input type="radio" name="opt_in" id="optin2-y" value="Yes"><label class="likedSample" for="likedSample-y">Yes</label><div class="check"></div></li>
+                          <li><input type="radio" name="opt_in" id="optin2-n" value="No"><label class="" for="likedSample-n">No</label><div class="check"></div></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </section> -->
+                  <!-- <a href="#" id="nevermind" class="button button-small button-3d fcenter">Never mind...</a> -->
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section><!-- #content end -->
+
+    <!-- Footer Scripts -->
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/usdl_keys.js"></script>
+    <script type="text/javascript" src="js/mrtd_keys.js"></script>
+    <script type="text/javascript" src="js/mykad_keys.js"></script>
+    <script type="text/javascript" src="js/ukdl_keys.js"></script>
+    <script type="text/javascript" src="js/DryrainJSLibrary.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <script type="text/javascript" src="js/jquery.mask.js"></script>
+  </body>
+</html>
